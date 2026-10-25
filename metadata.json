@@ -1,0 +1,6 @@
+{
+  "name": "Dios Te Dice",
+  "description": "Versículo diario de la Biblia con notificaciones 'Dios te dice hoy', selección por libre albedrío y compendio completo de oraciones cristianas católicas apostólicas.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
