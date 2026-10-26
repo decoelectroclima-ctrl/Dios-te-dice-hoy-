@@ -8,7 +8,9 @@ import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.platform.LocalContext
+import com.example.ui.theme.LocalFontSizeScale
 
 private val DarkColorScheme =
   darkColorScheme(
@@ -59,8 +61,8 @@ private val LightColorScheme =
 @Composable
 fun MyApplicationTheme(
   darkTheme: Boolean = isSystemInDarkTheme(),
-  // Keep the sacred spiritual palette consistent by default
   dynamicColor: Boolean = false,
+  fontSizeScale: Float = 1.0f,
   content: @Composable () -> Unit,
 ) {
   val colorScheme =
@@ -73,5 +75,7 @@ fun MyApplicationTheme(
       else -> LightColorScheme
     }
 
-  MaterialTheme(colorScheme = colorScheme, typography = Typography, content = content)
+  CompositionLocalProvider(LocalFontSizeScale provides fontSizeScale) {
+      MaterialTheme(colorScheme = colorScheme, typography = getTypography(fontSizeScale), content = content)
+  }
 }

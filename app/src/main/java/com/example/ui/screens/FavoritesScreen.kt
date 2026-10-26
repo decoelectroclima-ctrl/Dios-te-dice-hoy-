@@ -67,6 +67,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.PrayerRepository
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
+import androidx.compose.runtime.DisposableEffect
+import com.example.util.TextToSpeechHelper
 import com.example.data.UserPreferences
 import com.example.data.VerseRepository
 import com.example.notification.NotificationHelper
@@ -83,6 +87,15 @@ fun FavoritesScreen(
   val context = LocalContext.current
   val prefs = remember { UserPreferences(context) }
   val scope = rememberCoroutineScope()
+
+  val ttsHelper = remember { TextToSpeechHelper(context) }
+  var playingPrayerId by remember { mutableStateOf<String?>(null) }
+
+  DisposableEffect(Unit) {
+    onDispose {
+      ttsHelper.shutdown()
+    }
+  }
 
   var selectedTabIndex by remember { mutableIntStateOf(0) }
   val tabs = listOf("Versículos", "Oraciones", "Mis Peticiones", "Notificaciones")
@@ -295,6 +308,7 @@ fun FavoritesScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
           ) {
             items(favoritePrayers, key = { it.id }) { prayer ->
+              val isPlaying = playingPrayerId == prayer.id
               Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(18.dp),
@@ -306,7 +320,7 @@ fun FavoritesScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                   ) {
-                    Column {
+                    Column(modifier = Modifier.weight(1f)) {
                       Text(
                         text = prayer.title,
                         style = MaterialTheme.typography.titleMedium.copy(
@@ -324,18 +338,46 @@ fun FavoritesScreen(
                         )
                       }
                     }
+
+                    // Play/Stop audio with Voz Viva
                     IconButton(
                       onClick = {
+                        if (isPlaying) {
+                          ttsHelper.stop()
+                          playingPrayerId = null
+                        } else {
+                          ttsHelper.stop()
+                          ttsHelper.speak("${prayer.title}. ${prayer.content}")
+                          playingPrayerId = prayer.id
+                          scope.launch {
+                            snackbarHostState.showSnackbar("Reproduciendo con Voz Viva: ${prayer.title} 🎧")
+                          }
+                        }
+                      }
+                    ) {
+                      Icon(
+                        imageVector = if (isPlaying) Icons.Default.Stop else Icons.Default.PlayArrow,
+                        contentDescription = if (isPlaying) "Detener audio" else "Escuchar oración",
+                        tint = if (isPlaying) WinePrimary else MaterialTheme.colorScheme.primary
+                      )
+                    }
+
+                    IconButton(
+                      onClick = {
+                        if (isPlaying) {
+                          ttsHelper.stop()
+                          playingPrayerId = null
+                        }
                         prefs.toggleFavoritePrayer(prayer.id)
                         favPrayersIds = prefs.getFavoritePrayers()
                         scope.launch {
-                          snackbarHostState.showSnackbar("Oración quitada de favoritos")
+                          snackbarHostState.showSnackbar("Oración retirada de favoritas")
                         }
                       }
                     ) {
                       Icon(
                         imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar",
+                        contentDescription = "Eliminar de favoritas",
                         tint = MaterialTheme.colorScheme.outline
                       )
                     }
@@ -345,7 +387,7 @@ fun FavoritesScreen(
                     text = prayer.content,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 4
+                    maxLines = 5
                   )
                 }
               }
@@ -367,12 +409,15 @@ fun FavoritesScreen(
             modifier = Modifier
               .fillMaxWidth()
               .testTag("add_petition_button"),
-            colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+            colors = ButtonDefaults.buttonColors(
+              containerColor = WinePrimary,
+              contentColor = Color.White
+            ),
             shape = RoundedCornerShape(14.dp)
           ) {
-            Icon(imageVector = Icons.Default.Add, contentDescription = null)
+            Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = Color.White)
             Spacer(modifier = Modifier.width(8.dp))
-            Text("Añadir Petición o Intención de Oración")
+            Text("Añadir Petición o Intención de Oración", color = Color.White, fontWeight = FontWeight.Bold)
           }
 
           Spacer(modifier = Modifier.height(14.dp))
@@ -582,12 +627,15 @@ fun FavoritesScreen(
                     }
                   },
                   modifier = Modifier.fillMaxWidth(),
-                  colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+                  colors = ButtonDefaults.buttonColors(
+                    containerColor = WinePrimary,
+                    contentColor = Color.White
+                  ),
                   shape = RoundedCornerShape(12.dp)
                 ) {
-                  Icon(imageVector = Icons.Default.Notifications, contentDescription = null)
+                  Icon(imageVector = Icons.Default.Notifications, contentDescription = null, tint = Color.White)
                   Spacer(modifier = Modifier.width(8.dp))
-                  Text("Enviar Notificación de Prueba Ahora")
+                  Text("Enviar Notificación de Prueba Ahora", color = Color.White, fontWeight = FontWeight.Bold)
                 }
               }
             }
@@ -630,9 +678,12 @@ fun FavoritesScreen(
               }
             }
           },
-          colors = ButtonDefaults.buttonColors(containerColor = WinePrimary)
+          colors = ButtonDefaults.buttonColors(
+            containerColor = WinePrimary,
+            contentColor = Color.White
+          )
         ) {
-          Text("Guardar")
+          Text("Guardar", color = Color.White, fontWeight = FontWeight.Bold)
         }
       },
       dismissButton = {

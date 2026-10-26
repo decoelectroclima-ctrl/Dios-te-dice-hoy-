@@ -9,9 +9,15 @@ class BibleRepository(context: Context) {
     private val bibleDao = db.bibleDao()
     private val prefs = UserPreferences(context)
 
-    suspend fun getVerses(): List<BibleVerseEntity> {
-        val version = prefs.getBibleVersion()
-        return bibleDao.getVersesByVersion(version)
+    suspend fun getVerses(versionOverride: String? = null): List<BibleVerseEntity> {
+        val version = versionOverride ?: prefs.getBibleVersion()
+        val verses = bibleDao.getVersesByVersion(version)
+        if (verses.isEmpty() || verses.size <= 2) {
+            val fullCollection = BibleData.getAllVersesAsEntities(version)
+            bibleDao.insertAll(fullCollection)
+            return fullCollection
+        }
+        return verses
     }
 
     suspend fun downloadVerses(version: String, verses: List<BibleVerseEntity>) {

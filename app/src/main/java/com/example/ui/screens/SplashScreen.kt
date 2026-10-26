@@ -174,7 +174,7 @@ fun SplashScreen(
       Spacer(modifier = Modifier.height(14.dp))
 
       Text(
-        text = "Dios Te Dice",
+        text = "Dios Te Dice Hoy",
         style = MaterialTheme.typography.titleLarge.copy(
           fontFamily = FontFamily.Serif,
           fontWeight = FontWeight.Bold,

@@ -4,7 +4,7 @@ import androidx.compose.ui.graphics.Color
 
 // Sacred Christian / Catholic liturgical palette
 // Burgundy / Carmelite Wine (sacrificial love, royal majesty)
-val WinePrimary = Color(0xFF681A24)
+val WinePrimary = Color(0xFFAD2737) // Slightly lighter for better contrast
 val WineOnPrimary = Color(0xFFFFFFFF)
 val WinePrimaryContainer = Color(0xFFFFD9DC)
 val WineOnPrimaryContainer = Color(0xFF40000D)
@@ -31,9 +31,10 @@ val SacredOnSurfaceVariant = Color(0xFF504545)
 val SacredOutline = Color(0xFF837474)
 
 // Dark Theme Variants
-val WinePrimaryDark = Color(0xFFFFB2BC)
-val WineOnPrimaryDark = Color(0xFF5D0017)
-val WinePrimaryContainerDark = Color(0xFF822734)
+// High-contrast luminous rose/wine for text and accents on dark backgrounds (M3 compliance)
+val WinePrimaryDark = Color(0xFFFFB3B8)
+val WineOnPrimaryDark = Color(0xFF560014)
+val WinePrimaryContainerDark = Color(0xFF73001E)
 val WineOnPrimaryContainerDark = Color(0xFFFFD9DC)
 
 val GoldSecondaryDark = Color(0xFFF5CF68)

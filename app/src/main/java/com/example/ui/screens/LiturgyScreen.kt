@@ -76,8 +76,8 @@ fun LiturgyScreen(
   modifier: Modifier = Modifier
 ) {
   val context = LocalContext.current
-  val prefs = remember { com.example.data.UserPreferences(context) }
-  var fontSize by remember { mutableFloatStateOf(prefs.getFontSize()) }
+  val userPrefs = remember { com.example.data.UserPreferences(context) }
+  val fontSize = (userPrefs.getFontSize() * 16).toInt() // Assuming 1.0f base is 16sp
   var isAutoScrolling by remember { mutableStateOf(false) }
 
   val listState = rememberLazyListState()
@@ -119,16 +119,6 @@ fun LiturgyScreen(
         .padding(vertical = 8.dp),
       verticalAlignment = Alignment.CenterVertically
     ) {
-      Text("Aa", fontSize = 12.sp, modifier = Modifier.padding(end = 8.dp))
-      Slider(
-        value = fontSize,
-        onValueChange = {
-          fontSize = it
-          prefs.setFontSize(it)
-        },
-        valueRange = 12f..24f,
-        modifier = Modifier.weight(1f)
-      )
       IconButton(onClick = { isAutoScrolling = !isAutoScrolling }) {
         Icon(
           imageVector = if (isAutoScrolling) Icons.Default.Stop else Icons.Default.PlayArrow,
@@ -204,49 +194,48 @@ fun LiturgyScreen(
                         .background(Color(todayLiturgy.liturgicalColor.hexColor))
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    Text(
-                      text = "${todayLiturgy.liturgicalSeason} • Color ${todayLiturgy.liturgicalColor.displayName}",
-                      style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = (fontSize - 2).sp),
-                      color = Color(todayLiturgy.liturgicalColor.hexColor)
-                    )
-                  }
+                Text(
+                  text = "${todayLiturgy.liturgicalSeason} • Color ${todayLiturgy.liturgicalColor.displayName}",
+                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                  color = Color(todayLiturgy.liturgicalColor.hexColor)
+                )
+              }
 
-                  IconButton(
-                    onClick = {
-                      if (isSpeaking) {
-                        ttsHelper.stop()
-                        isSpeaking = false
-                      } else {
-                        val fullSpeech = "${todayLiturgy.dayTitle}. ${todayLiturgy.celebrationName}. Primera Lectura: ${todayLiturgy.firstReadingCitation}. ${todayLiturgy.firstReadingText}. Salmo: ${todayLiturgy.responsorialPsalmCitation}. ${todayLiturgy.responsorialPsalmResponse}. Evangelio: ${todayLiturgy.gospelCitation}. ${todayLiturgy.gospelText}"
-                        ttsHelper.speak(fullSpeech)
-                        isSpeaking = true
-                      }
-                    }
-                  ) {
-                    Icon(
-                      imageVector = if (isSpeaking) Icons.Default.Stop else Icons.Default.PlayArrow,
-                      contentDescription = "Escuchar lecturas completas",
-                      tint = WinePrimary
-                    )
+              IconButton(
+                onClick = {
+                  if (isSpeaking) {
+                    ttsHelper.stop()
+                    isSpeaking = false
+                  } else {
+                    val fullSpeech = "${todayLiturgy.dayTitle}. ${todayLiturgy.celebrationName}. Primera Lectura: ${todayLiturgy.firstReadingCitation}. ${todayLiturgy.firstReadingText}. Salmo: ${todayLiturgy.responsorialPsalmCitation}. ${todayLiturgy.responsorialPsalmResponse}. Evangelio: ${todayLiturgy.gospelCitation}. ${todayLiturgy.gospelText}"
+                    ttsHelper.speak(fullSpeech)
+                    isSpeaking = true
                   }
                 }
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                Text(
-                  text = todayLiturgy.dayTitle,
-                  style = MaterialTheme.typography.titleLarge.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontFamily = FontFamily.Serif,
-                    fontSize = (fontSize + 4).sp
-                  ),
-                  color = MaterialTheme.colorScheme.onSurface
+              ) {
+                Icon(
+                  imageVector = if (isSpeaking) Icons.Default.Stop else Icons.Default.PlayArrow,
+                  contentDescription = "Escuchar lecturas completas",
+                  tint = MaterialTheme.colorScheme.primary
                 )
-                Text(
-                  text = todayLiturgy.celebrationName,
-                  style = MaterialTheme.typography.bodyMedium.copy(fontSize = fontSize.sp),
-                  color = MaterialTheme.colorScheme.primary
-                )
+              }
+            }
+
+            Spacer(modifier = Modifier.height(6.dp))
+
+            Text(
+              text = todayLiturgy.dayTitle,
+              style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Serif
+              ),
+              color = MaterialTheme.colorScheme.onSurface
+            )
+            Text(
+              text = todayLiturgy.celebrationName,
+              style = MaterialTheme.typography.bodyMedium,
+              color = MaterialTheme.colorScheme.primary
+            )
               }
             }
           }
@@ -257,8 +246,8 @@ fun LiturgyScreen(
               title = "Antífona de Entrada",
               citation = null,
               content = todayLiturgy.entranceAntiphon,
-              italic = true,
-              fontSize = fontSize
+              fontSize = fontSize,
+              italic = true
             )
           }
 
@@ -268,8 +257,8 @@ fun LiturgyScreen(
               title = "Primera Lectura",
               citation = todayLiturgy.firstReadingCitation,
               content = todayLiturgy.firstReadingText,
-              footer = "Palabra de Dios. — R/. Te alabamos, Señor.",
-              fontSize = fontSize
+              fontSize = fontSize,
+              footer = "Palabra de Dios. — R/. Te alabamos, Señor."
             )
           }
 
@@ -283,12 +272,12 @@ fun LiturgyScreen(
               Column(modifier = Modifier.padding(16.dp)) {
                 Text(
                   text = "Salmo Responsorial",
-                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
+                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                   color = MaterialTheme.colorScheme.primary
                 )
                 Text(
                   text = todayLiturgy.responsorialPsalmCitation,
-                  style = MaterialTheme.typography.labelSmall.copy(fontSize = (fontSize - 2).sp),
+                  style = MaterialTheme.typography.labelSmall,
                   color = MaterialTheme.colorScheme.outline
                 )
                 Spacer(modifier = Modifier.height(8.dp))
@@ -300,7 +289,7 @@ fun LiturgyScreen(
                 ) {
                   Text(
                     text = todayLiturgy.responsorialPsalmResponse,
-                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
+                    style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.onPrimaryContainer,
                     modifier = Modifier.padding(10.dp)
                   )
@@ -310,7 +299,11 @@ fun LiturgyScreen(
 
                 Text(
                   text = todayLiturgy.responsorialPsalmText,
-                  style = MaterialTheme.typography.bodyMedium.copy(lineHeight = 22.sp, fontSize = fontSize.sp),
+                  style = MaterialTheme.typography.bodyLarge.copy(
+                    fontFamily = FontFamily.Serif,
+                    lineHeight = (fontSize * 1.5).sp,
+                    fontSize = fontSize.sp
+                  ),
                   color = MaterialTheme.colorScheme.onSurface
                 )
               }
@@ -324,8 +317,8 @@ fun LiturgyScreen(
                 title = "Segunda Lectura",
                 citation = todayLiturgy.secondReadingCitation,
                 content = todayLiturgy.secondReadingText,
-                footer = "Palabra de Dios. — R/. Te alabamos, Señor.",
-                fontSize = fontSize
+                fontSize = fontSize,
+                footer = "Palabra de Dios. — R/. Te alabamos, Señor."
               )
             }
           }
@@ -337,15 +330,19 @@ fun LiturgyScreen(
               color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
               modifier = Modifier.fillMaxWidth()
             ) {
-              Column(modifier = Modifier.padding(12.dp)) {
+              Column(modifier = Modifier.padding(14.dp)) {
                 Text(
                   text = "Aleluya y Aclamación",
-                  style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
+                  style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                   color = GoldSecondary
                 )
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                   text = todayLiturgy.gospelAcclamation,
-                  style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic, fontSize = fontSize.sp),
+                  style = MaterialTheme.typography.bodyLarge.copy(
+                    fontStyle = FontStyle.Italic,
+                    fontSize = fontSize.sp
+                  ),
                   color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
               }
@@ -399,7 +396,7 @@ fun LiturgyScreen(
 
                 Text(
                   text = "Palabra del Señor. — R/. Gloria a ti, Señor Jesús.",
-                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
+                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                   color = MaterialTheme.colorScheme.primary
                 )
               }
@@ -412,8 +409,8 @@ fun LiturgyScreen(
               title = "Antífona de Comunión",
               citation = null,
               content = todayLiturgy.communionAntiphon,
-              italic = true,
-              fontSize = fontSize
+              fontSize = fontSize,
+              italic = true
             )
           }
 
@@ -436,14 +433,14 @@ fun LiturgyScreen(
                   Spacer(modifier = Modifier.width(8.dp))
                   Text(
                     text = "Reflexión Litúrgica del Día",
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
+                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                     color = MaterialTheme.colorScheme.primary
                   )
                 }
                 Spacer(modifier = Modifier.height(6.dp))
                 Text(
                   text = todayLiturgy.liturgicalReflection,
-                  style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp, fontSize = fontSize.sp),
+                  style = MaterialTheme.typography.bodySmall.copy(lineHeight = 20.sp),
                   color = MaterialTheme.colorScheme.onSurface
                 )
               }
@@ -539,9 +536,9 @@ fun LiturgySectionCard(
   title: String,
   citation: String?,
   content: String,
+  fontSize: Int = 16,
   italic: Boolean = false,
-  footer: String? = null,
-  fontSize: Float
+  footer: String? = null
 ) {
   Card(
     modifier = Modifier.fillMaxWidth(),
@@ -551,23 +548,23 @@ fun LiturgySectionCard(
     Column(modifier = Modifier.padding(16.dp)) {
       Text(
         text = title,
-        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
+        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
         color = MaterialTheme.colorScheme.primary
       )
       if (citation != null) {
         Text(
           text = citation,
-          style = MaterialTheme.typography.labelSmall.copy(fontSize = (fontSize - 2).sp),
+          style = MaterialTheme.typography.labelSmall.copy(fontSize = (fontSize - 2).coerceAtLeast(12).sp),
           color = MaterialTheme.colorScheme.outline
         )
       }
       Spacer(modifier = Modifier.height(8.dp))
       Text(
         text = content,
-        style = MaterialTheme.typography.bodyMedium.copy(
+        style = MaterialTheme.typography.bodyLarge.copy(
           fontFamily = FontFamily.Serif,
           fontStyle = if (italic) FontStyle.Italic else FontStyle.Normal,
-          lineHeight = (fontSize + 6).sp,
+          lineHeight = (fontSize * 1.5).sp,
           fontSize = fontSize.sp
         ),
         color = MaterialTheme.colorScheme.onSurface
@@ -576,7 +573,10 @@ fun LiturgySectionCard(
         Spacer(modifier = Modifier.height(8.dp))
         Text(
           text = footer,
-          style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
+          style = MaterialTheme.typography.bodyMedium.copy(
+            fontWeight = FontWeight.Bold,
+            fontSize = fontSize.sp
+          ),
           color = MaterialTheme.colorScheme.primary
         )
       }
@@ -588,7 +588,7 @@ fun LiturgySectionCard(
 fun OrdinaryPartCard(
   part: com.example.model.OrdinaryPart,
   showLatin: Boolean,
-  fontSize: Float
+  fontSize: Int = 16
 ) {
   var expandedExplanation by remember { mutableStateOf(false) }
 
@@ -611,7 +611,7 @@ fun OrdinaryPartCard(
           ) {
             Text(
               text = part.section,
-              style = MaterialTheme.typography.labelSmall.copy(fontSize = (fontSize - 4).sp),
+              style = MaterialTheme.typography.labelSmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant,
               modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp)
             )
@@ -621,15 +621,14 @@ fun OrdinaryPartCard(
             text = part.title,
             style = MaterialTheme.typography.titleMedium.copy(
               fontWeight = FontWeight.Bold,
-              fontFamily = FontFamily.Serif,
-              fontSize = (fontSize + 2).sp
+              fontFamily = FontFamily.Serif
             ),
             color = MaterialTheme.colorScheme.onSurface
           )
           if (showLatin && part.latinTitle != null) {
             Text(
               text = part.latinTitle,
-              style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic, fontSize = (fontSize - 2).sp),
+              style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic),
               color = GoldSecondary
             )
           }
@@ -639,14 +638,14 @@ fun OrdinaryPartCard(
           Icon(
             imageVector = Icons.Default.Info,
             contentDescription = "Explicación",
-            tint = if (expandedExplanation) WinePrimary else MaterialTheme.colorScheme.outline
+            tint = if (expandedExplanation) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outline
           )
         }
       }
 
       Spacer(modifier = Modifier.height(6.dp))
 
-      // Rubric (Postura / Acción)
+      // Rubric
       Surface(
         shape = RoundedCornerShape(8.dp),
         color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.35f),
@@ -654,7 +653,10 @@ fun OrdinaryPartCard(
       ) {
         Text(
           text = "Rúbrica: ${part.rubric}",
-          style = MaterialTheme.typography.labelSmall.copy(fontStyle = FontStyle.Italic, fontSize = (fontSize - 2).sp),
+          style = MaterialTheme.typography.labelSmall.copy(
+            fontStyle = FontStyle.Italic,
+            fontSize = (fontSize - 2).coerceAtLeast(11).sp
+          ),
           color = MaterialTheme.colorScheme.onSecondaryContainer,
           modifier = Modifier.padding(horizontal = 10.dp, vertical = 6.dp)
         )
@@ -665,12 +667,12 @@ fun OrdinaryPartCard(
       // Sacerdote
       Text(
         text = "Sacerdote:",
-        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
-        color = WinePrimary
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
+        color = MaterialTheme.colorScheme.primary
       )
       Text(
         text = part.priestDialogue,
-        style = MaterialTheme.typography.bodySmall.copy(lineHeight = (fontSize + 3).sp, fontSize = fontSize.sp),
+        style = MaterialTheme.typography.bodyLarge.copy(fontSize = fontSize.sp, lineHeight = (fontSize * 1.4).sp),
         color = MaterialTheme.colorScheme.onSurface
       )
 
@@ -679,7 +681,7 @@ fun OrdinaryPartCard(
       // Pueblo
       Text(
         text = "Pueblo (Fieles):",
-        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
+        style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
         color = GoldSecondary
       )
       Surface(
@@ -689,28 +691,28 @@ fun OrdinaryPartCard(
       ) {
         Text(
           text = if (showLatin && part.latinPeopleResponse != null) part.latinPeopleResponse else part.peopleResponse,
-          style = MaterialTheme.typography.bodyMedium.copy(
+          style = MaterialTheme.typography.bodyLarge.copy(
             fontWeight = FontWeight.SemiBold,
-            lineHeight = (fontSize + 5).sp,
-            fontSize = fontSize.sp
+            fontSize = (fontSize + 1).sp,
+            lineHeight = (fontSize * 1.45).sp
           ),
           color = MaterialTheme.colorScheme.onPrimaryContainer,
           modifier = Modifier.padding(10.dp)
         )
       }
 
-      // Pedagogical Explanation for Laypeople
+      // Pedagogical Explanation
       AnimatedVisibility(visible = expandedExplanation) {
         Column(modifier = Modifier.padding(top = 10.dp)) {
           Text(
             text = "Sentido litúrgico y espiritual:",
-            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = fontSize.sp),
+            style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
             color = MaterialTheme.colorScheme.primary
           )
           Spacer(modifier = Modifier.height(2.dp))
           Text(
             text = part.explanation,
-            style = MaterialTheme.typography.bodySmall.copy(fontSize = fontSize.sp),
+            style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
           )
         }

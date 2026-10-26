@@ -1076,6 +1076,545 @@ Concédenos gracia, misericordia y valentía,
 y defiéndenos de todo mal.
 Amén.""",
       description = "Oración escrita por el Papa Francisco en la Carta Apostólica Patris Corde para honrar al Santo Patriarca custodio de la Iglesia."
+    ),
+    CatholicPrayer(
+      id = "san_judas_tadeo",
+      title = "A San Judas Tadeo (Causas Difíciles)",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PROTECCION,
+      content = """¡Oh glorioso Apóstol San Judas Tadeo, fiel siervo y amigo de Jesús!
+El nombre del traidor ha sido la causa de que muchos te hayan olvidado, pero la Iglesia te honra e invoca universalmente como el celestial patrón de los casos difíciles y desesperados.
+
+Ruega por mí, que soy tan necesitado. Haz uso, te ruego, de ese privilegio especial a ti concedido de socorrer pronto y visiblemente cuando casi se ha perdido toda esperanza.
+
+Ven en mi ayuda en esta gran necesidad, para que pueda recibir los consuelos y el socorro del cielo en todas mis tribulaciones y sufrimientos, y para que pueda bendecir a Dios contigo y con todos los escogidos por toda la eternidad.
+
+Te prometo, glorioso San Judas, acordarme siempre de este gran favor, honrarte siempre como mi especial y poderoso protector, y hacer con todo fervor cuanto pueda para fomentar tu devoción.
+Amén.""",
+      description = "Súplica secular de intercesión al Santo Apóstol protector en circunstancias de extrema angustia o causa perdida."
+    ),
+    CatholicPrayer(
+      id = "oracion_salud_enfermos",
+      title = "Oración por la Salud y los Enfermos",
+      category = PrayerCategory.PROTECCION,
+      purpose = PrayerPurpose.PROTECCION,
+      content = """Señor Jesús, Médico divino de los cuerpos y de las almas:
+Tú que pasaste haciendo el bien, sanando toda dolencia y aliviando con ternura a los que sufrían:
+mira con ojos de infinita misericordia a nuestros hermanos enfermos, ancianos y afligidos.
+
+Te encomendamos sus dolores, sus angustias y sus noches de inquietud.
+Renueva sus fuerzas, devuelve la salud a sus cuerpos si es para gloria tuya y bien de sus almas,
+y concede a sus corazones la paz y la fortaleza sobrenatural para unir sus sufrimientos a tu Santa Cruz redentora.
+
+Bendice las manos de los médicos, enfermeros, cuidadores y familiares,
+para que sean reflejo vivo de tu consuelo y caridad.
+Virgen María, Salud de los Enfermos y Consuelo de los Afligidos, ruega por nosotros.
+Amén.""",
+      description = "Invocación de sanación física y espiritual confiando en la compasión de Cristo y el cuidado de los que sufren."
+    ),
+    CatholicPrayer(
+      id = "san_antonio_de_padua",
+      title = "A San Antonio de Padua (Doctor Evangélico)",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PAZ_INTERIOR,
+      content = """¡Oh bendito San Antonio de Padua, lirio de castidad y gloria de la Iglesia!
+Tú que mereciste tener en tus brazos al Niño Jesús y proclamaste el Evangelio con ardor y caridad inagotables:
+vuelve a mí tu mirada compasiva.
+
+Ayúdame a recuperar la gracia y amistad de Dios si la he perdido por el pecado;
+socórreme en mis necesidades materiales y espirituales;
+y alcánzame fortaleza para conservar la fe intacta en medio de las pruebas del mundo.
+
+Tú que eres invocado por el pueblo cristiano para hallar lo que se ha extraviado,
+encuéntrame en mis momentos de duda, tentación o desaliento, y guíame de vuelta al camino de la Verdad,
+para que amando a Dios sobre todas las cosas, llegue a gozar de su presencia en la eternidad.
+Amén.""",
+      description = "Famosa plegaria al Taumaturgo de Padua para hallar consuelo, recuperar la fe y recibir socorro en las necesidades."
+    ),
+    CatholicPrayer(
+      id = "consagracion_sagrado_corazon",
+      title = "Consagración al Sagrado Corazón de Jesús",
+      category = PrayerCategory.EUCARISTIA,
+      purpose = PrayerPurpose.ALABANZA_Y_EUCARISTIA,
+      content = """Rendido a tus pies, ¡oh Jesús mío!, considerando las inefables muestras de amor que me has dado y las sublimes virtudes de tu adorable Corazón, te pido humildemente la gracia de conocerte, amarte y servirte fielmente todos los días de mi vida.
+
+Yo me entrego y consagro enteramente a tu Sagrado Corazón: mi alma, mi cuerpo, mis acciones, alegrías, penas y sufrimientos, para no querer servirme de ninguna parte de mi ser sino para honrarte, amarte y glorificarte.
+
+Sé, pues, ¡oh Corazón bondadoso!, mi único refugio en la vida y mi amparo seguro en la hora de mi muerte; la reparación de mis culpas, la defensa en mis tentaciones y la santificación de mi familia.
+¡Sagrado Corazón de Jesús, en Ti confío!
+Amén.""",
+      description = "Oración de consagración y entrega filial inspirada en las revelaciones de Paray-le-Monial a Santa Margarita María Alacoque."
+    ),
+    CatholicPrayer(
+      id = "angelus_domini",
+      title = "El Ángelus (Salutación Mariana)",
+      latinTitle = "Angelus Domini",
+      category = PrayerCategory.VIRGEN_MARIA,
+      purpose = PrayerPurpose.DIA_Y_NOCHE,
+      content = """V. El Ángel del Señor anunció a María.
+R. Y concibió por obra y gracia del Espíritu Santo.
+(Dios te salve, María...)
+
+V. He aquí la esclava del Señor.
+R. Hágase en mí según tu palabra.
+(Dios te salve, María...)
+
+V. Y el Verbo de Dios se hizo carne.
+R. Y habitó entre nosotros.
+(Dios te salve, María...)
+
+V. Ruega por nosotros, Santa Madre de Dios.
+R. Para que seamos dignos de alcanzar las promesas de Nuestro Señor Jesucristo.
+
+Oración:
+Te rogamos, Señor, que derrames tu gracia en nuestras almas; para que los que, por el anuncio del Ángel, hemos conocido la encarnación de tu Hijo Jesucristo, por los méritos de su pasión y cruz seamos llevados a la gloria de su resurrección. Por el mismo Jesucristo Nuestro Señor.
+Amén.""",
+      description = "Milenaria oración mariana que la Iglesia reza al alba, al mediodía (12:00 m.) y al atardecer para honrar la Encarnación del Salvador.",
+      isTraditionLatinAvailable = true,
+      latinContent = """V. Angelus Domini nuntiavit Mariae.
+R. Et concepit de Spiritu Sancto.
+(Ave Maria...)
+
+V. Ecce ancilla Domini.
+R. Fiat mihi secundum verbum tuum.
+(Ave Maria...)
+
+V. Et Verbum caro factum est.
+R. Et habitavit in nobis.
+(Ave Maria...)
+
+V. Ora pro nobis, Sancta Dei Genetrix.
+R. Ut digni efficiamur promissionibus Christi.
+
+Oremus:
+Gratiam tuam, quaesumus, Domine, mentibus nostris infunde; ut qui, Angelo nuntiante, Christi Filii tui incarnationem cognovimus, per passionem eius et crucem ad resurrectionis gloriam perducamur. Per eundem Christum Dominum nostrum.
+Amen."""
+    ),
+    CatholicPrayer(
+      id = "regina_caeli",
+      title = "Reina del Cielo (Tiempo Pascual)",
+      latinTitle = "Regina Caeli, Laetare",
+      category = PrayerCategory.VIRGEN_MARIA,
+      purpose = PrayerPurpose.MARIA_Y_ROSARIO,
+      content = """Reina del cielo, alégrate, ¡aleluya!,
+porque el Señor, a quien mereciste llevar en tu seno, ¡aleluya!,
+ha resucitado, según su palabra, ¡aleluya!
+Ruega al Señor por nosotros, ¡aleluya!
+
+V. Gózate y alégrate, Virgen María, ¡aleluya!
+R. Porque verdaderamente ha resucitado el Señor, ¡aleluya!
+
+Oración:
+¡Oh Dios!, que por la gloriosa resurrección de tu Hijo, nuestro Señor Jesucristo, te dignaste llenar de júbilo al mundo entero: concédenos, por intercesión de su Madre, la Santísima Virgen María, llegar a alcanzar los gozos de la vida eterna. Por el mismo Jesucristo Nuestro Señor.
+Amén.""",
+      description = "Antífona mariana que sustituye al Ángelus durante el santo Tiempo de Pascua, celebrando el triunfo victorioso de Cristo sobre la muerte.",
+      isTraditionLatinAvailable = true,
+      latinContent = """Regina caeli, laetare, alleluia;
+Quia quem meruisti portare, alleluia,
+Resurrexit sicut dixit, alleluia:
+Ora pro nobis Deum, alleluia.
+
+V. Gaude et laetare, Virgo Maria, alleluia.
+R. Quia surrexit Dominus vere, alleluia.
+
+Oremus:
+Deus, qui per resurrectionem Filii tui, Domini nostri Iesu Christi, mundum laetificare dignatus es: praesta, quaesumus, ut per eius Genetricem Virginem Mariam, perpetuae capiamus gaudia vitae. Per eundem Christum Dominum nostrum.
+Amen."""
+    ),
+    CatholicPrayer(
+      id = "san_cayetano_trabajo",
+      title = "A San Cayetano (Pan, Paz y Trabajo)",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PROTECCION,
+      content = """¡Oh glorioso San Cayetano, Padre de la Divina Providencia!
+Tú que viviste confiando plenamente en la bondad paternal de Dios,
+sin atesorar grandezas terrenales y consagrando tu corazón entero a los pobres, enfermos y desamparados:
+mira con bondad a nuestra familia en este día.
+
+Danos, Señor, por intercesión de San Cayetano, salud de alma y cuerpo, paz en el espíritu y trabajo honrado y digno.
+Que nunca falte el pan de cada día en nuestra mesa,
+ni la concordia en nuestro hogar, ni la justicia en nuestra sociedad.
+
+Aleja de nuestro corazón el desaliento y la queja en momentos de dificultad económica,
+y concédenos buscar siempre primero el Reino de Dios y su justicia, seguros de que tu infinita providencia nunca nos abandonará.
+Amén.""",
+      description = "Oración tradicional al Santo de la Providencia para implorar trabajo honrado, sustento cotidiano y paz en el hogar."
+    ),
+    CatholicPrayer(
+      id = "suscipe_domine_san_ignacio",
+      title = "Tomad, Señor, y Recibid (San Ignacio)",
+      latinTitle = "Suscipe, Domine",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PAZ_INTERIOR,
+      content = """Tomad, Señor, y recibid
+toda mi libertad, mi memoria,
+mi entendimiento y toda mi voluntad;
+todo mi haber y mi poseer.
+
+Vos me lo disteis, a Vos, Señor, lo torno;
+todo es vuestro, disponed a toda vuestra voluntad.
+
+Dadme vuestro amor y gracia,
+que ésta me basta.
+Amén.""",
+      description = "La sublime oración de entrega total y contemplación para alcanzar amor de San Ignacio de Loyola (Ejercicios Espirituales).",
+      isTraditionLatinAvailable = true,
+      latinContent = """Suscipe, Domine, universam meam libertatem.
+Accipe memoriam, intellectum atque voluntatem omnem.
+Quidquid habeo vel possideo mihi largitus es;
+id tibi totum restituo,
+ac tuae prorsus voluntati trado gubernandum.
+Amorem tui solum cum gratia tua mihi dones,
+et dives sum satis,
+nec sit quod praeterea requiram.
+Amen."""
+    ),
+    CatholicPrayer(
+      id = "santa_rita_de_casia",
+      title = "A Santa Rita de Casia (Causas Imposibles)",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PROTECCION,
+      content = """Bajo el peso de la angustia y de la prueba,
+a ti recurro, ¡oh gloriosa Santa Rita de Casia!,
+a quien la devoción de los fieles llama la abogada de los casos desesperados y patrona de las causas imposibles.
+
+Líbrame, te lo ruego, de la pesadumbre que agobia mi corazón,
+y alcánzame de Dios la paz, el consuelo y la serenidad que tanto anhelo.
+Tú que fuiste favorecida con la llaga viva de la espina del Crucificado en tu frente:
+haz valer tu intercesión amorosa ante el Trono del Altísimo.
+
+Si mis faltas y debilidades son un obstáculo para recibir lo que imploro,
+alcánzame de Dios un sincero arrepentimiento, el perdón de mis pecados y la gracia de una vida santa.
+No permitas que caiga en la desesperación,
+sino enséñame a confiar siempre en la infinita bondad de Dios.
+Amén.""",
+      description = "Invocación a la insigne santa agustina de Casia, abogada celestial ante aflicciones graves e imposibles humanos."
+    ),
+    CatholicPrayer(
+      id = "oracion_santo_tomas_estudio",
+      title = "Oración de Santo Tomás para el Estudio y Trabajo",
+      latinTitle = "Creator Ineffabilis",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.ESPIRITU_SANTO,
+      content = """Creador inefable,
+que de los tesoros de tu sabiduría ordenaste con admirable providencia el universo entero
+y repartiste con divina armonía todas sus partes:
+
+Tú, que eres llamado verdadera Fuente de Luz y Principio soberano de toda Sabiduría,
+dígnate derramar sobre las tinieblas de mi inteligencia un rayo de tu claridad,
+apartando de mí la doble penumbra de mi alma: el pecado y la ignorancia.
+
+Tú, que haces hablar con sabiduría a los sencillos,
+educa mi lengua e infunde en mis labios la gracia de tu bendición celestial.
+Dame agudeza para entender, capacidad para retener,
+método y facilidad para aprender, sutileza para interpretar
+y gracia fecunda para expresarme.
+
+Dame acierto al empezar, dirección y prudencia al progresar, y perfección al concluir.
+Tú que eres verdadero Dios y verdadero Hombre,
+que vives y reinas por los siglos de los siglos.
+Amén.""",
+      description = "Célebre oración de Santo Tomás de Aquino rezada por estudiantes, opositores y trabajadores antes de su jornada."
+    ),
+    CatholicPrayer(
+      id = "coronilla_san_miguel_arcangel",
+      title = "Coronilla a San Miguel y los 9 Coros Angélicos",
+      category = PrayerCategory.PROTECCION,
+      purpose = PrayerPurpose.PROTECCION,
+      content = """Poderosa súplica revelada por el Arcángel San Miguel con la promesa de continua asistencia angélica durante la vida y protección especial en el momento de la muerte:
+
+1. Por intercesión de San Miguel y el celestial Coro de los Serafines: El Señor nos haga dignos de arder en el fuego de la perfecta caridad.
+(1 Padre Nuestro, 3 Ave Marías)
+
+2. Por intercesión de San Miguel y el Coro de los Querubines: El Señor nos conceda la gracia de abandonar los caminos del pecado y correr por los de la perfección cristiana.
+(1 Padre Nuestro, 3 Ave Marías)
+
+3. Por intercesión de San Miguel y el Coro de los Tronos: El Señor infunda en nuestros corazones un sincero y humilde espíritu filial.
+(1 Padre Nuestro, 3 Ave Marías)
+
+4. Por intercesión de San Miguel y el Coro de las Dominaciones: El Señor nos dé la gracia de dominar nuestros sentidos e inclinaciones desordenadas.
+(1 Padre Nuestro, 3 Ave Marías)
+
+5. Por intercesión de San Miguel y el Coro de las Potestades: El Señor proteja nuestras almas contra las insidias y tentaciones del demonio.
+(1 Padre Nuestro, 3 Ave Marías)
+
+6. Por intercesión de San Miguel y el Coro de las Virtudes: El Señor nos preserve de todo mal y nos libre de caer en tentación.
+(1 Padre Nuestro, 3 Ave Marías)
+
+7. Por intercesión de San Miguel y el Coro de los Principados: El Señor llene nuestras almas de un verdadero y ferviente espíritu de obediencia.
+(1 Padre Nuestro, 3 Ave Marías)
+
+8. Por intercesión de San Miguel y el Coro de los Arcángeles: El Señor nos conceda la perseverancia final en la santa fe y en las buenas obras.
+(1 Padre Nuestro, 3 Ave Marías)
+
+9. Por intercesión de San Miguel y el Coro de los Ángeles: El Señor nos conceda ser custodiados por ellos durante esta vida y conducidos a la gloria eterna.
+(1 Padre Nuestro, 3 Ave Marías)
+
+Al finalizar se rezan 4 Padre Nuestros:
+1º en honor a San Miguel, 2º a San Gabriel, 3º a San Rafael y 4º a nuestro Santo Ángel Custodio.
+Amén.""",
+      description = "Devoción aprobada por el Papa Pío IX en 1851 para honrar a los nueve coros angélicos e implorar su amparo continuo.",
+      hasCounter = true,
+      counterTotal = 9
+    ),
+    CatholicPrayer(
+      id = "himno_te_deum",
+      title = "Himno Te Deum (A Ti, Dios, te alabamos)",
+      latinTitle = "Te Deum Laudamus",
+      category = PrayerCategory.EUCARISTIA,
+      purpose = PrayerPurpose.ALABANZA_Y_EUCARISTIA,
+      content = """A Ti, Dios, te alabamos, a Ti, Señor, te reconocemos.
+A Ti, eterno Padre, te venera toda la creación.
+Los ángeles todos, los cielos y todas las potestades,
+los querubines y serafines te cantan sin cesar:
+¡Santo, Santo, Santo es el Señor, Dios del universo!
+Llenos están los cielos y la tierra de la majestad de tu gloria.
+
+A Ti te alaba el glorioso coro de los Apóstoles,
+la multitud admirable de los Profetas,
+el blanco ejército de los Mártires.
+A Ti la Iglesia santa extendida por toda la tierra te confiesa:
+Padre de inmensa majestad,
+Hijo único y verdadero, digno de adoración,
+Espíritu Santo Defensor.
+
+Tú eres el Rey de la gloria, Cristo.
+Tú eres el Hijo eterno del Padre.
+Tú, para liberar al hombre, no dudaste en encarnarte en el seno de la Virgen.
+Tú, vencida la espina de la muerte, abriste a los creyentes el reino de los cielos.
+Tú estás sentado a la derecha de Dios en la gloria del Padre.
+Creemos que has de venir como juez.
+
+Te rogamos, pues, que ayudes a tus siervos,
+a quienes redimiste con tu preciosa sangre.
+Haz que seamos contados entre tus santos en la gloria eterna.
+Salva a tu pueblo, Señor, y bendice tu heredad.
+En Ti, Señor, he esperado; no quede yo defraudado para siempre.
+Amén.""",
+      description = "Solemne himno de acción de gracias de la Iglesia Católica, atribuido tradicionalmente a San Ambrosio y San Agustín, rezado en momentos de gran gozo y agradecimiento a Dios.",
+      isTraditionLatinAvailable = true,
+      latinContent = """Te Deum laudamus: te Dominum confitemur.
+Te aeternum Patrem omnis terra veneratur.
+Tibi omnes Angeli; tibi caeli et universae Potestates;
+Tibi Cherubim et Seraphim incessabili voce proclamant:
+Sanctus, Sanctus, Sanctus, Dominus Deus Sabaoth.
+Pleni sunt caeli et terra maiestatis gloriae tuae.
+Salvum fac populum tuum, Domine, et benedic hereditati tuae.
+In te, Domine, speravi: non confundar in aeternum. Amen."""
+    ),
+    CatholicPrayer(
+      id = "oracion_abandono_foucauld",
+      title = "Oración de Abandono Filial (San Charles de Foucauld)",
+      latinTitle = "Oratio Fiduciae et Deditionis",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PAZ_INTERIOR,
+      content = """Padre mío, me pongo en tus manos,
+haz de mí lo que quieras,
+sea lo que sea, te doy las gracias.
+Estoy dispuesto a todo, lo acepto todo,
+con tal que tu voluntad se haga en mí
+y en todas tus criaturas.
+No deseo nada más, Padre.
+
+Te confío mi alma, te la doy
+con todo el amor de que soy capaz,
+porque te amo y necesito darme,
+ponerme en tus manos sin medida,
+con una infinita confianza,
+porque Tú eres mi Padre.
+Amén.""",
+      description = "Plegaria cumbre de total confianza y abandono filial en las manos de Dios Padre, escrita por San Charles de Foucauld en el silencio del desierto."
+    ),
+    CatholicPrayer(
+      id = "oracion_san_jose_terror_demonios",
+      title = "Oración a San José, Terror de los Demonios",
+      latinTitle = "Ad Sanctum Ioseph Terror Daemonum",
+      category = PrayerCategory.PROTECCION,
+      purpose = PrayerPurpose.PROTECCION,
+      content = """¡Oh San José, cuya protección es tan grande, tan fuerte y tan pronta ante el trono de Dios!
+A Ti entrego todas mis intenciones y deseos.
+San José, terror de los demonios, aleja de mí y de los míos todo espíritu de división, miedo, soberbia y desaliento.
+
+Tú que defendiste a la Sagrada Familia de las asechanzas del enemigo,
+sé escudo protector en todas mis batallas espirituales.
+Asísteme en cada instante de mi vida y alcánzame una santa muerte en brazos de Jesús y de María.
+Amén.""",
+      description = "Invocación a San José bajo su poderosa advocación litúrgica como Terror de los Demonios y Protector de los hogares cristianos."
+    ),
+    CatholicPrayer(
+      id = "oracion_santa_teresita_lluvia_rosas",
+      title = "Oración a Santa Teresita del Niño Jesús (Lluvia de Rosas)",
+      latinTitle = "Oratio ad Sanctam Theresiam a Iesu Infante",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PAZ_INTERIOR,
+      content = """¡Oh Santa Teresita del Niño Jesús y de la Santa Faz!,
+que prometiste pasar tu cielo haciendo el bien sobre la tierra
+y derramar una lluvia de rosas sobre quienes acuden a ti:
+
+Mira con ternura mis necesidades presentes y concédeme la gracia de vivir en el Pequeño Camino
+de la santa infancia espiritual, confiando sin límites en la infinita misericordia de Dios.
+Alcanza para mi corazón la pureza, la humildad y el amor ardiente a Jesús Eucaristía.
+Derrama sobre mi vida las rosas de la paz, la sanación y la bendición del Señor.
+Amén.""",
+      description = "Plegaria a la Doctora de la Iglesia y patrona de las misiones para alcanzar consuelo y la gracia de la pequeñez evangélica."
+    ),
+    CatholicPrayer(
+      id = "oracion_san_judas_tadeo_casos_dificiles",
+      title = "Plegaria a San Judas Tadeo para Casos Imposibles",
+      latinTitle = "Ad Sanctum Iudam Thaddaeum",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PROTECCION,
+      content = """¡Oh Glorioso Apóstol San Judas Tadeo, siervo fiel y amigo de Jesús!
+La Iglesia te honra e invoca universalmente como el patrón de las causas difíciles y desesperadas.
+
+Ruega por mí, que me encuentro en gran tribulación y desconsuelo.
+Haz uso, te lo ruego, del singular privilegio a ti concedido de socorrer pronto y visiblemente
+donde casi toda esperanza se ha perdido.
+Ven en mi ayuda en esta gran necesidad, para que reciba el consuelo y el auxilio del Cielo
+en todas mis congojas, tribulaciones y sufrimientos, y para que pueda alabar a Dios contigo y con todos los elegidos por toda la eternidad.
+
+Te prometo, bienaventurado San Judas, recordar siempre este gran favor,
+honrarte siempre como a mi especial y poderoso patrono,
+y fomentar con celo tu devoción.
+Amén.""",
+      description = "Oración tradicional de inmensa eficacia para pedir intercesión apostólica en momentos de angustia apremiante y causas que parecen insolubles."
+    ),
+    CatholicPrayer(
+      id = "oracion_santa_monica_hijos",
+      title = "Oración de Santa Mónica por los Hijos y la Familia",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PAZ_INTERIOR,
+      content = """¡Oh Santa Mónica, modelo de esposas y madres cristianas!,
+que con lágrimas y perseverante oración obtuviste del Señor la conversión de tu esposo Patricio y de tu hijo San Agustín:
+
+Vuelve tus ojos de misericordia hacia mi familia y hacia mis seres queridos.
+Tú que conoces el dolor de ver extraviados a quienes amas,
+toma bajo tu custodia el corazón de mis hijos y familiares.
+Obtén para ellos la luz de la fe verdadera, la rectitud en sus conciencias y el regreso a los sacramentos de la Iglesia.
+Enséñame tu paciencia inquebrantable y tu absoluta confianza en la Divina Providencia.
+Por Jesucristo Nuestro Señor.
+Amén.""",
+      description = "Plegaria dirigida a Santa Mónica, madre de San Agustín, patrona de las madres que oran con lágrimas por la conversión y salvación de sus hijos."
+    ),
+    CatholicPrayer(
+      id = "oracion_san_peregrino_enfermos",
+      title = "Oración a San Peregrino por los Enfermos y la Salud",
+      category = PrayerCategory.PROTECCION,
+      purpose = PrayerPurpose.PROTECCION,
+      content = """¡Glorioso San Peregrino!, tú que respondiste a la llamada divina con gran devoción
+y sobrellevaste con heroica paciencia el cáncer que consumía tu pierna,
+siendo curado milagrosamente por una caricia del crucifijo:
+
+Intercede ante Jesús, el Divino Médico de almas y cuerpos,
+por todos los que sufren enfermedades graves, cáncer y dolores intensos.
+Alcánzanos la salud si conviene para la salvación de nuestras almas,
+y la fortaleza serena para ofrecer nuestros sufrimientos unidos a la Pasión de Cristo.
+Amén.""",
+      description = "San Peregrino Laziosi es el patrono celestial de los enfermos de cáncer y dolencias graves de la piel y extremidades."
+    ),
+    CatholicPrayer(
+      id = "oracion_virgen_desatanudos",
+      title = "Oración a Nuestra Señora Desatadora de Nudos",
+      latinTitle = "Ad Beatam Mariam Virginem Nodos Dissolventem",
+      category = PrayerCategory.VIRGEN_MARIA,
+      purpose = PrayerPurpose.MARIA_Y_ROSARIO,
+      content = """Santa María, llena de la presencia de Dios, durante los días de tu vida aceptaste con toda humildad la voluntad del Padre, y el maligno nunca fue capaz de enredarte con sus confusiones.
+Ya junto a tu Hijo intercediste por nuestras dificultades y, con toda sencillez y paciencia, nos diste ejemplo de cómo desenredar la madeja de nuestras vidas.
+
+Madre amorosa, pongo en tus manos maternales los nudos que asfixian mi vida y me impiden unirme plenamente a Dios:
+desata las ataduras de mi egoísmo, el nudo de mis rencores, la confusión en mis decisiones y las discordias en mi hogar.
+Por tu gracia y tu poder intercesor ante Jesús, líbrame de todo mal y desata los nudos que me atan,
+para que, libre de todo engaño, pueda alabar al Señor siempre y en todo lugar.
+Amén.""",
+      description = "Devoción mariana entrañable, profundamente difundida por el Papa Francisco, para desenredar los problemas, conflictos familiares y ataduras espirituales."
+    ),
+    CatholicPrayer(
+      id = "salmo_51_miserere",
+      title = "Salmo 51: Miserere (Piedad de mí, Señor)",
+      latinTitle = "Miserere Mei, Deus",
+      category = PrayerCategory.BASICAS,
+      purpose = PrayerPurpose.PERDON_Y_MISERICORDIA,
+      content = """Piedad de mí, Señor, por tu bondad;
+por tu gran compasión borra mi culpa.
+Lávame a fondo de mi iniquidad
+y purifícame de mi pecado.
+
+Pues yo reconozco mi falta,
+tengo siempre presente mi pecado.
+Contra Ti, contra Ti solo he pecado,
+he hecho lo que es malo a tus ojos.
+
+Crea en mí, oh Dios, un corazón puro,
+renueva en mi interior un espíritu firme;
+no me rechaces lejos de tu rostro,
+no retires de mí tu Santo Espíritu.
+
+Devuélveme la alegría de tu salvación,
+afiánzame con espíritu generoso.
+Señor, ábreme los labios
+y mi boca proclamará tu alabanza.
+Amén.""",
+      description = "El salmo penitencial por excelencia compuesto por el Rey David, súplica de corazón contrito que implora la purificación y la renovación del alma.",
+      isTraditionLatinAvailable = true,
+      latinContent = """Miserere mei, Deus, secundum magnam misericordiam tuam;
+et secundum multitudinem miserationum tuarum dele iniquitatem meam.
+Amplius lava me ab iniquitate mea, et a peccato meo munda me.
+Quoniam iniquitatem meam ego cognosco, et peccatum meum contra me est semper.
+Tibi soli peccavi, et malum coram te feci.
+Cor mundum crea in me, Deus, et spiritum rectum innova in visceribus meis.
+Amen."""
+    ),
+    CatholicPrayer(
+      id = "oracion_san_pio_quedate_conmigo",
+      title = "Oración de San Pío: «Quédate conmigo, Señor»",
+      category = PrayerCategory.EUCARISTIA,
+      purpose = PrayerPurpose.ALABANZA_Y_EUCARISTIA,
+      content = """Quédate conmigo, Señor, porque es necesario tenerte presente para no olvidarte.
+Tú sabes con cuánta facilidad te abandono.
+
+Quédate conmigo, Señor, porque soy débil y necesito de tu fuerza para no caer tantas veces.
+Quédate conmigo, Señor, porque Tú eres mi vida, y sin Ti me falta el fervor.
+Quédate conmigo, Señor, porque Tú eres mi luz, y sin Ti estoy en tinieblas.
+
+Quédate conmigo, Señor, para mostrarme tu voluntad.
+Quédate conmigo, Señor, para que escuche tu voz y te siga.
+Quédate conmigo, Jesús, porque aunque mi alma sea pobrísima, desea ser para Ti una morada de consuelo y un nido de amor.
+Haz que te reconozca como tus discípulos al partir el pan, y que la Eucaristía sea la luz que disipe las tinieblas y la fuerza de mi vida.
+Amén.""",
+      description = "Conmovedora súplica que San Pío de Pietrelcina rezaba tras celebrar la Santa Misa, implorando la presencia constante de Jesús en el alma."
+    ),
+    CatholicPrayer(
+      id = "oracion_san_rafael_arcangel",
+      title = "Oración al Arcángel San Rafael (Medicina de Dios)",
+      latinTitle = "Ad Sanctum Raphaelem Archangelum",
+      category = PrayerCategory.PROTECCION,
+      purpose = PrayerPurpose.PROTECCION,
+      content = """¡Oh glorioso Arcángel San Rafael, medicina de Dios y guía de los caminantes!
+Tú que sanaste la ceguera de Tobías y lo guiaste sano y salvo en su largo viaje:
+
+Ven en mi ayuda y acompáñame en el viaje de mi vida terrena.
+Sana las heridas de mi cuerpo y las llagas de mi alma.
+Presérvame de los peligros del camino, de los accidentes y de las trampas del demonio.
+Condúceme siempre por sendas de virtud, pureza y paz, hasta contemplar con los santos el rostro de Dios en el cielo.
+Amén.""",
+      description = "Plegaria al Arcángel San Rafael, compañero de viaje providencial, patrono de médicos, enfermeros, ciegos y viajeros."
+    ),
+    CatholicPrayer(
+      id = "oracion_santo_cura_ars",
+      title = "Acto de Amor a Dios (Santo Cura de Ars)",
+      category = PrayerCategory.SANTOS,
+      purpose = PrayerPurpose.PAZ_INTERIOR,
+      content = """Te amo, oh mi Dios, y mi único deseo es amarte hasta el último suspiro de mi vida.
+Te amo, oh Dios infinitamente amable, y prefiero morir amándote que vivir un solo instante sin amarte.
+
+Te amo, Señor, y la única gracia que te pido es amarte eternamente.
+Dios mío, si mi lengua no puede decir a cada instante que te amo,
+quiero que mi corazón te lo repita tantas veces cuantas respiro.
+Te amo, mi divino Salvador, porque has sido crucificado por mí;
+y me tienes aquí, crucificado contigo.
+Dios mío, dame la gracia de morir amándote y sintiendo que te amo.
+Amén.""",
+      description = "Hermosísima plegaria de San Juan María Vianney (el Santo Cura de Ars), patrono de todos los sacerdotes, modelo de entrega y ardiente caridad hacia Dios."
     )
   )
 
@@ -1087,10 +1626,14 @@ Amén.""",
   fun getHolySpiritPrayers(): List<CatholicPrayer> =
     prayers.filter { it.purpose == PrayerPurpose.ESPIRITU_SANTO }
 
-  fun searchPrayers(query: String): List<CatholicPrayer> {
+  fun getFavoritePrayers(favoriteIds: Set<String>): List<CatholicPrayer> =
+    prayers.filter { favoriteIds.contains(it.id) }
+
+  fun searchPrayers(query: String, subset: List<CatholicPrayer>? = null): List<CatholicPrayer> {
     val q = query.trim().lowercase()
-    if (q.isEmpty()) return prayers
-    return prayers.filter {
+    val source = subset ?: prayers
+    if (q.isEmpty()) return source
+    return source.filter {
       it.title.lowercase().contains(q) ||
         (it.latinTitle?.lowercase()?.contains(q) == true) ||
         it.content.lowercase().contains(q) ||
@@ -1101,3 +1644,4 @@ Amén.""",
   fun getPrayerById(id: String): CatholicPrayer? =
     prayers.find { it.id == id }
 }
+

@@ -153,7 +153,7 @@ fun HomeScreen(
       action = Intent.ACTION_SEND
       putExtra(
         Intent.EXTRA_TEXT,
-        "✨ Dios te dice hoy:\n«${verse.godSaysToday}»\n\n📖 ${verse.text}\n— ${verse.citation}\n\n💡 Significado para hoy:\n${verse.modernMeaning}\n\n👣 Aplicación práctica:\n${verse.practicalApplication}\n\nCompartido desde la app Dios Te Dice"
+        "✨ Dios te dice hoy:\n«${verse.godSaysToday}»\n\n📖 ${verse.text}\n— ${verse.citation}\n\n💡 Significado para hoy:\n${verse.modernMeaning}\n\n👣 Aplicación práctica:\n${verse.practicalApplication}\n\nCompartido desde la app Dios Te Dice Hoy"
       )
       type = "text/plain"
     }

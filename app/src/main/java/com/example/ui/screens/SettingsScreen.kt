@@ -84,6 +84,7 @@ import java.util.Locale
 fun SettingsScreen(
   snackbarHostState: SnackbarHostState,
   onThemeChanged: (String) -> Unit,
+  onFontSizeChanged: (Float) -> Unit,
   onOpenPinSetup: () -> Unit,
   modifier: Modifier = Modifier
 ) {
@@ -275,6 +276,32 @@ fun SettingsScreen(
       }
     }
 
+    item {
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .widthIn(max = 600.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+      ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+           var fontSize by remember { mutableStateOf(prefs.getFontSize().coerceIn(0.8f, 1.5f)) }
+           Text("Tamaño de letra: ${(fontSize * 100).toInt()}%")
+           androidx.compose.material3.Slider(
+              value = fontSize,
+              onValueChange = { 
+                  fontSize = it
+                  prefs.setFontSize(it)
+                  onFontSizeChanged(it)
+              },
+              valueRange = 0.8f..1.5f,
+              steps = 6
+           )
+        }
+      }
+    }
+
     // BIBLE VERSION SELECTION
     item {
       Card(
@@ -351,21 +378,8 @@ fun SettingsScreen(
                      haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
                      scope.launch {
                         snackbarHostState.showSnackbar("Descargando e instalando $version...")
-                        val mockVerses = listOf(
-                          BibleVerseEntity(
-                            id = "gen_1_1_$version",
-                            version = version,
-                            citation = "Génesis 1:1",
-                            text = "En el principio creó Dios los cielos y la tierra. ($version)",
-                            category = "ESPERANZA",
-                            godSaysToday = "Yo soy el principio.",
-                            modernMeaning = "Dios es el origen de todo.",
-                            practicalApplication = "Confía en Su creación.",
-                            virtue = "Fe",
-                            testament = "Antiguo Testamento"
-                          )
-                        )
-                        BibleRepository(context).downloadVerses(version, mockVerses)
+                        val fullVerses = com.example.data.BibleData.getAllVersesAsEntities(version)
+                        BibleRepository(context).downloadVerses(version, fullVerses)
                         prefs.addInstalledVersion(version)
                         installedVersions = prefs.getInstalledVersions()
                         snackbarHostState.showSnackbar("$version descargada e instalada exitosamente.")
@@ -465,10 +479,13 @@ fun SettingsScreen(
                   snackbarHostState.showSnackbar("🔔 ¡Notificación «Dios te dice hoy» enviada al sistema!")
                 }
               },
-              colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+              colors = ButtonDefaults.buttonColors(
+                containerColor = WinePrimary,
+                contentColor = Color.White
+              ),
               shape = RoundedCornerShape(10.dp)
             ) {
-              Text("Probar ahora")
+              Text("Probar ahora", color = Color.White, fontWeight = FontWeight.Bold)
             }
           }
         }
@@ -559,10 +576,13 @@ fun SettingsScreen(
                   snackbarHostState.showSnackbar("🔔 ¡Notificación nocturna de prueba enviada al sistema!")
                 }
               },
-              colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+              colors = ButtonDefaults.buttonColors(
+                containerColor = WinePrimary,
+                contentColor = Color.White
+              ),
               shape = RoundedCornerShape(10.dp)
             ) {
-              Text("Probar ahora")
+              Text("Probar ahora", color = Color.White, fontWeight = FontWeight.Bold)
             }
           }
         }
@@ -646,13 +666,18 @@ fun SettingsScreen(
           ) {
             Button(
               onClick = { onOpenPinSetup() },
-              colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+              colors = ButtonDefaults.buttonColors(
+                containerColor = WinePrimary,
+                contentColor = Color.White
+              ),
               shape = RoundedCornerShape(10.dp),
               modifier = Modifier.weight(1f)
             ) {
               Text(
                 text = if (hasPin) "Cambiar PIN de 4 dígitos" else "Configurar PIN de 4 dígitos",
-                fontSize = 12.sp
+                fontSize = 12.sp,
+                color = Color.White,
+                fontWeight = FontWeight.Bold
               )
             }
 
@@ -763,7 +788,7 @@ fun SettingsScreen(
           Spacer(modifier = Modifier.height(10.dp))
 
           Text(
-            text = "Mantén pulsada la pantalla de inicio de tu teléfono, entra en 'Widgets', busca 'Dios Te Dice' y colócalo en tu pantalla. El widget se actualiza diariamente sin necesidad de abrir la aplicación.",
+            text = "Mantén pulsada la pantalla de inicio de tu teléfono, entra en 'Widgets', busca 'Dios Te Dice Hoy' y colócalo en tu pantalla. El widget se actualiza diariamente sin necesidad de abrir la aplicación.",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
           )
@@ -777,11 +802,14 @@ fun SettingsScreen(
                 snackbarHostState.showSnackbar("✨ Todos los widgets actualizados con el versículo de hoy")
               }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+            colors = ButtonDefaults.buttonColors(
+              containerColor = WinePrimary,
+              contentColor = Color.White
+            ),
             shape = RoundedCornerShape(10.dp),
             modifier = Modifier.fillMaxWidth()
           ) {
-            Text("Sincronizar Widget Ahora")
+            Text("Sincronizar Widget Ahora", color = Color.White, fontWeight = FontWeight.Bold)
           }
         }
       }
@@ -823,8 +851,8 @@ fun SettingsScreen(
             color = MaterialTheme.colorScheme.onSecondaryContainer
           )
         }
+
       }
-      Spacer(modifier = Modifier.height(24.dp))
     }
   }
 }

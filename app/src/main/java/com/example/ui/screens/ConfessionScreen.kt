@@ -228,12 +228,15 @@ el bien de las almas y mi propia santificación.
           modifier = Modifier
             .weight(1f)
             .testTag("add_sin_button"),
-          colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+          colors = ButtonDefaults.buttonColors(
+            containerColor = WinePrimary,
+            contentColor = Color.White
+          ),
           shape = RoundedCornerShape(14.dp)
         ) {
-          Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+          Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
           Spacer(modifier = Modifier.width(6.dp))
-          Text("Anotar Falta")
+          Text("Anotar Falta", color = Color.White, fontWeight = FontWeight.Bold)
         }
 
         OutlinedButton(
@@ -557,9 +560,12 @@ el bien de las almas y mi propia santificación.
               }
             }
           },
-          colors = ButtonDefaults.buttonColors(containerColor = WinePrimary)
+          colors = ButtonDefaults.buttonColors(
+            containerColor = WinePrimary,
+            contentColor = Color.White
+          )
         ) {
-          Text("Guardar")
+          Text("Guardar", color = Color.White, fontWeight = FontWeight.Bold)
         }
       },
       dismissButton = {

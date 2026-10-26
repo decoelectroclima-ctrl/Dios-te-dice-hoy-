@@ -78,7 +78,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"
         android:gravity="center"
-        android:text="🕊️ Toca para rezar y abrir Dios Te Dice"
+        android:text="🕊️ Toca para rezar y abrir Dios Te Dice Hoy"
         android:textColor="#8A7A7E"
         android:textSize="10sp" />
 

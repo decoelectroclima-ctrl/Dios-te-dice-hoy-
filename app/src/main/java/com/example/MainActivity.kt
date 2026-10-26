@@ -58,6 +58,7 @@ import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.LiturgyScreen
 import com.example.ui.screens.ParishScreen
 import com.example.ui.screens.PrayersScreen
+import com.example.ui.screens.SacredMusicScreen
 import com.example.ui.screens.SettingsScreen
 import com.example.ui.screens.SpiritualLifeScreen
 import com.example.ui.screens.HolySpiritScreen
@@ -76,7 +77,8 @@ enum class SubScreen {
   HAND_OF_GOD,
   HOLY_SPIRIT,
   SETTINGS,
-  AUTH_SETUP
+  AUTH_SETUP,
+  SPOTIFY_MUSIC
 }
 
 class MainActivity : FragmentActivity() {
@@ -104,6 +106,7 @@ class MainActivity : FragmentActivity() {
       val context = LocalContext.current
       val userPrefs = remember { UserPreferences(context) }
       var currentThemeMode by remember { mutableStateOf(userPrefs.getThemeMode()) }
+      var fontSizeScale by remember { mutableStateOf(userPrefs.getFontSize()) }
       var isAppUnlocked by remember { mutableStateOf(!userPrefs.isAppLockEnabled()) }
 
       val isDark = when (currentThemeMode) {
@@ -112,7 +115,7 @@ class MainActivity : FragmentActivity() {
         else -> isSystemInDarkTheme()
       }
 
-      MyApplicationTheme(darkTheme = isDark) {
+      MyApplicationTheme(darkTheme = isDark, fontSizeScale = fontSizeScale) {
         var showSplash by remember { mutableStateOf(openTabExtra == null) }
 
         if (showSplash) {
@@ -128,6 +131,9 @@ class MainActivity : FragmentActivity() {
             currentThemeMode = currentThemeMode,
             onThemeModeChanged = { newMode ->
               currentThemeMode = newMode
+            },
+            onFontSizeChanged = { newScale ->
+              fontSizeScale = newScale
             }
           )
         }
@@ -146,7 +152,8 @@ class MainActivity : FragmentActivity() {
 fun MainAppContent(
   initialSubScreen: SubScreen? = null,
   currentThemeMode: String,
-  onThemeModeChanged: (String) -> Unit
+  onThemeModeChanged: (String) -> Unit,
+  onFontSizeChanged: (Float) -> Unit
 ) {
   val context = LocalContext.current
   val userPrefs = remember { UserPreferences(context) }
@@ -216,6 +223,7 @@ fun MainAppContent(
                     SubScreen.HAND_OF_GOD -> "La Mano de Dios"
                     SubScreen.HOLY_SPIRIT -> "Apartado del Espíritu Santo"
                     SubScreen.AUTH_SETUP -> "Seguridad y PIN"
+                    SubScreen.SPOTIFY_MUSIC -> "Música Sacra en Spotify"
                     null -> ""
                   },
                   style = MaterialTheme.typography.titleLarge.copy(
@@ -243,7 +251,7 @@ fun MainAppContent(
             )
           } else {
             SacredTopBar(
-              title = "Dios Te Dice",
+              title = "Dios Te Dice Hoy",
               subtitle = navItems[currentTabIndex].subtitle,
               onSettingsClick = {
                 subScreen = SubScreen.SETTINGS
@@ -308,6 +316,7 @@ fun MainAppContent(
                     SubScreen.SETTINGS -> SettingsScreen(
                         snackbarHostState = snackbarHostState,
                         onThemeChanged = onThemeModeChanged,
+                        onFontSizeChanged = onFontSizeChanged,
                         onOpenPinSetup = { subScreen = SubScreen.AUTH_SETUP }
                     )
                     SubScreen.FREE_WILL -> FreeWillScreen(
@@ -331,6 +340,9 @@ fun MainAppContent(
                             }
                         )
                     }
+                    SubScreen.SPOTIFY_MUSIC -> SacredMusicScreen(
+                        snackbarHostState = snackbarHostState
+                    )
                 }
             } else {
                 when (activeTab) {
@@ -355,7 +367,8 @@ fun MainAppContent(
                         onNavigateToFreeWill = { subScreen = SubScreen.FREE_WILL },
                         onNavigateToHolySpirit = { subScreen = SubScreen.HOLY_SPIRIT },
                         onNavigateToConfession = { currentTabIndex = 3 },
-                        onNavigateToHandOfGod = { subScreen = SubScreen.HAND_OF_GOD }
+                        onNavigateToHandOfGod = { subScreen = SubScreen.HAND_OF_GOD },
+                        onNavigateToSpotify = { subScreen = SubScreen.SPOTIFY_MUSIC }
                     )
                     6 -> ParishScreen(
                         snackbarHostState = snackbarHostState

@@ -170,7 +170,7 @@ fun FreeWillScreen(
       action = Intent.ACTION_SEND
       putExtra(
         Intent.EXTRA_TEXT,
-        "✨ Dios te dice hoy (Elegido con Libre Albedrío):\n«${verse.godSaysToday}»\n\n📖 ${verse.text}\n— ${verse.citation}\n\nApp Dios Te Dice"
+        "✨ Dios te dice hoy (Elegido con Libre Albedrío):\n«${verse.godSaysToday}»\n\n📖 ${verse.text}\n— ${verse.citation}\n\nApp Dios Te Dice Hoy"
       )
       type = "text/plain"
     }

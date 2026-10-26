@@ -185,12 +185,15 @@ fun HandOfGodScreen(
           .fillMaxWidth()
           .widthIn(max = 600.dp)
           .testTag("add_hand_of_god_button"),
-        colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+        colors = ButtonDefaults.buttonColors(
+          containerColor = WinePrimary,
+          contentColor = Color.White
+        ),
         shape = RoundedCornerShape(14.dp)
       ) {
-        Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+        Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
         Spacer(modifier = Modifier.width(8.dp))
-        Text("¿Dónde notaste hoy la mano de Dios? (Escribir)")
+        Text("¿Dónde notaste hoy la mano de Dios? (Escribir)", color = Color.White, fontWeight = FontWeight.Bold)
       }
     }
 
@@ -290,10 +293,13 @@ fun HandOfGodScreen(
                   snackbarHostState.showSnackbar("🔔 ¡Notificación nocturna de prueba enviada!")
                 }
               },
-              colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+              colors = ButtonDefaults.buttonColors(
+                containerColor = WinePrimary,
+                contentColor = Color.White
+              ),
               shape = RoundedCornerShape(10.dp)
             ) {
-              Text("Probar", fontSize = 12.sp)
+              Text("Probar", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
             }
           }
         }
@@ -503,9 +509,12 @@ fun HandOfGodScreen(
               }
             }
           },
-          colors = ButtonDefaults.buttonColors(containerColor = WinePrimary)
+          colors = ButtonDefaults.buttonColors(
+            containerColor = WinePrimary,
+            contentColor = Color.White
+          )
         ) {
-          Text("Guardar")
+          Text("Guardar", color = Color.White, fontWeight = FontWeight.Bold)
         }
       },
       dismissButton = {

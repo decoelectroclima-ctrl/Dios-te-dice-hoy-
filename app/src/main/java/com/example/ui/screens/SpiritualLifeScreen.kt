@@ -18,6 +18,7 @@ fun SpiritualLifeScreen(
     onNavigateToHolySpirit: () -> Unit,
     onNavigateToConfession: () -> Unit,
     onNavigateToHandOfGod: () -> Unit,
+    onNavigateToSpotify: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -27,6 +28,15 @@ fun SpiritualLifeScreen(
         item {
             Text("Vida Espiritual", style = MaterialTheme.typography.headlineMedium, color = WinePrimary)
             Spacer(modifier = Modifier.height(16.dp))
+        }
+
+        item {
+            NavigationCard(
+                title = "Música Sacra en Spotify",
+                description = "Canto gregoriano, adoración, alabanza y tus propias listas de Spotify para orar.",
+                icon = "🎵",
+                onClick = onNavigateToSpotify
+            )
         }
 
         item {

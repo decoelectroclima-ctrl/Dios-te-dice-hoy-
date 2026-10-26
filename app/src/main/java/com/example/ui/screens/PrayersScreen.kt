@@ -4,11 +4,8 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -23,7 +20,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -33,30 +29,31 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.FavoriteBorder
 import androidx.compose.material.icons.filled.Headphones
-import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.filled.ViewList
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Badge
+import androidx.compose.material3.BadgedBox
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.FilterChip
-import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.ScrollableTabRow
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
-import androidx.compose.material3.TabRow
+import androidx.compose.material3.TabRowDefaults
+import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -77,6 +74,8 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.PrayerRepository
@@ -102,16 +101,29 @@ fun PrayersScreen(
   val ttsHelper = remember { TextToSpeechHelper(context) }
   var currentlyPlayingPrayerId by remember { mutableStateOf<String?>(null) }
 
+  // Reactive state for user favorites
+  var favoritePrayersSet by remember { mutableStateOf(prefs.getFavoritePrayers()) }
+
   DisposableEffect(Unit) {
     onDispose {
       ttsHelper.shutdown()
     }
   }
 
+  // Determine initial view tab:
+  // 0: Favoritas ⭐, 1: Índice por Propósito, 2: Espíritu Santo 🔥, 3: Todas las Oraciones
   var viewModeIndex by remember {
-    mutableIntStateOf(if (initialPurposeFilter == PrayerPurpose.ESPIRITU_SANTO) 1 else 0)
+    mutableIntStateOf(
+      when {
+        initialPurposeFilter == PrayerPurpose.ESPIRITU_SANTO -> 2
+        initialPurposeFilter != null -> 1
+        favoritePrayersSet.isNotEmpty() -> 0
+        else -> 3
+      }
+    )
   }
-  val viewTabs = listOf("Índice por Propósito", "Espíritu Santo 🔥", "Todas las Oraciones")
+
+  val viewTabs = listOf("Favoritas ⭐", "Por Propósito", "Espíritu Santo 🔥", "Todas las Oraciones")
 
   var searchQuery by remember { mutableStateOf("") }
   var selectedPurpose by remember { mutableStateOf<PrayerPurpose?>(initialPurposeFilter) }
@@ -127,8 +139,19 @@ fun PrayersScreen(
       ttsHelper.speak(textToSpeak)
       currentlyPlayingPrayerId = prayer.id
       scope.launch {
-        snackbarHostState.showSnackbar("Reproduciendo audio: ${prayer.title} 🎧")
+        snackbarHostState.showSnackbar("Reproduciendo con Voz Viva: «${prayer.title}» 🎧")
       }
+    }
+  }
+
+  fun toggleFavorite(prayer: CatholicPrayer) {
+    val isNowFav = prefs.toggleFavoritePrayer(prayer.id)
+    favoritePrayersSet = prefs.getFavoritePrayers()
+    scope.launch {
+      snackbarHostState.showSnackbar(
+        if (isNowFav) "«${prayer.title}» añadida a Favoritas ⭐"
+        else "«${prayer.title}» retirada de Favoritas"
+      )
     }
   }
 
@@ -149,34 +172,68 @@ fun PrayersScreen(
   ) {
     Spacer(modifier = Modifier.height(4.dp))
 
-    // Top Navigation Mode
-    TabRow(
+    // Top Navigation Mode (Scrollable Tabs for comfortable touch on all devices)
+    ScrollableTabRow(
       selectedTabIndex = viewModeIndex,
       modifier = Modifier
         .fillMaxWidth()
         .widthIn(max = 600.dp)
         .clip(RoundedCornerShape(14.dp)),
       containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-      contentColor = WinePrimary
+      contentColor = WinePrimary,
+      edgePadding = 8.dp,
+      indicator = { tabPositions ->
+        if (viewModeIndex < tabPositions.size) {
+          TabRowDefaults.SecondaryIndicator(
+            modifier = Modifier.tabIndicatorOffset(tabPositions[viewModeIndex]),
+            color = WinePrimary,
+            height = 3.dp
+          )
+        }
+      }
     ) {
       viewTabs.forEachIndexed { index, title ->
+        val isSelected = viewModeIndex == index
         Tab(
-          selected = viewModeIndex == index,
+          selected = isSelected,
           onClick = {
             viewModeIndex = index
-            if (index == 1) {
-              selectedPurpose = PrayerPurpose.ESPIRITU_SANTO
+            if (index == 1 && selectedPurpose == null) {
+              selectedPurpose = PrayerPurpose.DIA_Y_NOCHE
             } else if (index == 2) {
-              selectedPurpose = null
+              selectedPurpose = PrayerPurpose.ESPIRITU_SANTO
             }
           },
           text = {
-            Text(
-              text = title,
-              style = MaterialTheme.typography.labelSmall.copy(
-                fontWeight = if (viewModeIndex == index) FontWeight.Bold else FontWeight.Normal
+            if (index == 0 && favoritePrayersSet.isNotEmpty()) {
+              BadgedBox(
+                badge = {
+                  Badge(
+                    containerColor = WinePrimary,
+                    contentColor = Color.White
+                  ) {
+                    Text(text = "${favoritePrayersSet.size}", fontSize = 10.sp)
+                  }
+                }
+              ) {
+                Text(
+                  text = title,
+                  style = MaterialTheme.typography.labelMedium.copy(
+                    fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                    color = if (isSelected) WinePrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                  ),
+                  modifier = Modifier.padding(end = 4.dp)
+                )
+              }
+            } else {
+              Text(
+                text = title,
+                style = MaterialTheme.typography.labelMedium.copy(
+                  fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                  color = if (isSelected) WinePrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                )
               )
-            )
+            }
           }
         )
       }
@@ -187,7 +244,7 @@ fun PrayersScreen(
     // Audio Notice Banner
     Surface(
       shape = RoundedCornerShape(12.dp),
-      color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f),
+      color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f),
       modifier = Modifier
         .fillMaxWidth()
         .widthIn(max = 600.dp)
@@ -206,7 +263,7 @@ fun PrayersScreen(
         )
         Spacer(modifier = Modifier.width(10.dp))
         Text(
-          text = "Toca el botón ▶ en cualquier oración para escucharla si no puedes leerla.",
+          text = "Voz Viva: Pulsa el botón ▶ para escuchar cualquier oración si no puedes leerla.",
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSecondaryContainer
         )
@@ -223,12 +280,12 @@ fun PrayersScreen(
         .fillMaxWidth()
         .widthIn(max = 600.dp)
         .testTag("prayer_search_input"),
-      placeholder = { Text("Buscar oración por nombre o palabra clave...") },
+      placeholder = { Text("Buscar oración por nombre o contenido...") },
       leadingIcon = {
         Icon(
           imageVector = Icons.Default.Search,
           contentDescription = "Buscar",
-          tint = MaterialTheme.colorScheme.primary
+          tint = WinePrimary
         )
       },
       trailingIcon = {
@@ -241,7 +298,7 @@ fun PrayersScreen(
       singleLine = true,
       shape = RoundedCornerShape(14.dp),
       colors = OutlinedTextFieldDefaults.colors(
-        focusedBorderColor = MaterialTheme.colorScheme.primary,
+        focusedBorderColor = WinePrimary,
         unfocusedBorderColor = MaterialTheme.colorScheme.outline.copy(alpha = 0.4f),
         focusedContainerColor = MaterialTheme.colorScheme.surface,
         unfocusedContainerColor = MaterialTheme.colorScheme.surface
@@ -252,7 +309,186 @@ fun PrayersScreen(
 
     when (viewModeIndex) {
       0 -> {
-        // TAB 1: ÍNDICE POR PROPÓSITO ESPIRITUAL
+        // ==================== TAB 0: APARTADO DE FAVORITAS ⭐ ====================
+        val favoritePrayers = remember(favoritePrayersSet, searchQuery) {
+          val favs = PrayerRepository.getFavoritePrayers(favoritePrayersSet)
+          if (searchQuery.isNotBlank()) {
+            PrayerRepository.searchPrayers(searchQuery, favs)
+          } else {
+            favs
+          }
+        }
+
+        LazyColumn(
+          modifier = Modifier
+            .fillMaxSize()
+            .widthIn(max = 600.dp),
+          verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+          if (favoritePrayersSet.isEmpty()) {
+            item {
+              Card(
+                modifier = Modifier
+                  .fillMaxWidth()
+                  .padding(top = 16.dp),
+                shape = RoundedCornerShape(18.dp),
+                colors = CardDefaults.cardColors(
+                  containerColor = MaterialTheme.colorScheme.surface
+                ),
+                border = androidx.compose.foundation.BorderStroke(
+                  1.dp,
+                  Brush.horizontalGradient(listOf(GoldSecondary, WinePrimary))
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+              ) {
+                Column(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp),
+                  horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                  Surface(
+                    shape = CircleShape,
+                    color = WinePrimary.copy(alpha = 0.12f),
+                    modifier = Modifier.size(64.dp)
+                  ) {
+                    Box(contentAlignment = Alignment.Center) {
+                      Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = null,
+                        tint = WinePrimary,
+                        modifier = Modifier.size(36.dp)
+                      )
+                    }
+                  }
+                  Spacer(modifier = Modifier.height(16.dp))
+                  Text(
+                    text = "Aún no tienes oraciones favoritas",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                      fontWeight = FontWeight.Bold,
+                      fontFamily = FontFamily.Serif
+                    ),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    textAlign = TextAlign.Center
+                  )
+                  Spacer(modifier = Modifier.height(8.dp))
+                  Text(
+                    text = "Pulsa el icono de corazón (♡) en cualquiera de las oraciones para guardarla en este apartado y tenerla siempre a mano para leerla o escucharla con Voz Viva cuando lo desees.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    textAlign = TextAlign.Center
+                  )
+                  Spacer(modifier = Modifier.height(20.dp))
+                  Button(
+                    onClick = { viewModeIndex = 3 },
+                    colors = ButtonDefaults.buttonColors(
+                      containerColor = WinePrimary,
+                      contentColor = Color.White
+                    ),
+                    shape = RoundedCornerShape(12.dp)
+                  ) {
+                    Icon(
+                      imageVector = Icons.Default.ViewList,
+                      contentDescription = null,
+                      modifier = Modifier.size(18.dp),
+                      tint = Color.White
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                      text = "Explorar todas las oraciones",
+                      color = Color.White,
+                      fontWeight = FontWeight.Bold
+                    )
+                  }
+                }
+              }
+            }
+          } else {
+            item {
+              Surface(
+                shape = RoundedCornerShape(14.dp),
+                color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
+                modifier = Modifier.fillMaxWidth()
+              ) {
+                Row(
+                  modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 14.dp, vertical = 10.dp),
+                  verticalAlignment = Alignment.CenterVertically,
+                  horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                  Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                      imageVector = Icons.Default.Favorite,
+                      contentDescription = null,
+                      tint = WinePrimary,
+                      modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(
+                      text = "${favoritePrayers.size} ${if (favoritePrayers.size == 1) "oración en favoritas" else "oraciones en favoritas"}",
+                      style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                      color = MaterialTheme.colorScheme.onSurface
+                    )
+                  }
+                  if (favoritePrayers.isNotEmpty()) {
+                    TextButton(
+                      onClick = {
+                        val first = favoritePrayers.first()
+                        playOrStopPrayer(first)
+                      }
+                    ) {
+                      Icon(
+                        imageVector = if (currentlyPlayingPrayerId != null && favoritePrayers.any { it.id == currentlyPlayingPrayerId }) Icons.Default.Stop else Icons.Default.PlayArrow,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp),
+                        tint = WinePrimary
+                      )
+                      Spacer(modifier = Modifier.width(4.dp))
+                      Text(
+                        text = if (currentlyPlayingPrayerId != null && favoritePrayers.any { it.id == currentlyPlayingPrayerId }) "Detener" else "Escuchar",
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                        color = WinePrimary
+                      )
+                    }
+                  }
+                }
+              }
+            }
+
+            if (favoritePrayers.isEmpty() && searchQuery.isNotBlank()) {
+              item {
+                Text(
+                  text = "No se encontraron oraciones favoritas que coincidan con «$searchQuery»",
+                  style = MaterialTheme.typography.bodyMedium,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant,
+                  modifier = Modifier.padding(16.dp),
+                  textAlign = TextAlign.Center
+                )
+              }
+            }
+
+            items(favoritePrayers, key = { it.id }) { prayer ->
+              PrayerItemRow(
+                prayer = prayer,
+                isPlaying = currentlyPlayingPrayerId == prayer.id,
+                isFavorite = true,
+                onPlayClick = { playOrStopPrayer(prayer) },
+                onFavoriteClick = { toggleFavorite(prayer) },
+                onClick = {
+                  ttsHelper.stop()
+                  currentlyPlayingPrayerId = null
+                  activePrayerDetail = prayer
+                }
+              )
+            }
+          }
+          item { Spacer(modifier = Modifier.height(24.dp)) }
+        }
+      }
+
+      1 -> {
+        // ==================== TAB 1: ÍNDICE POR PROPÓSITO ESPIRITUAL ====================
         LazyColumn(
           modifier = Modifier
             .fillMaxSize()
@@ -323,11 +559,9 @@ fun PrayersScreen(
                       PrayerItemRow(
                         prayer = prayer,
                         isPlaying = currentlyPlayingPrayerId == prayer.id,
-                        isFavorite = prefs.isPrayerFavorite(prayer.id),
+                        isFavorite = favoritePrayersSet.contains(prayer.id),
                         onPlayClick = { playOrStopPrayer(prayer) },
-                        onFavoriteClick = {
-                          prefs.toggleFavoritePrayer(prayer.id)
-                        },
+                        onFavoriteClick = { toggleFavorite(prayer) },
                         onClick = {
                           ttsHelper.stop()
                           currentlyPlayingPrayerId = null
@@ -344,9 +578,16 @@ fun PrayersScreen(
         }
       }
 
-      1 -> {
-        // TAB 2: APARTADO ESPECIAL DEL ESPÍRITU SANTO
-        val holySpiritPrayers = remember { PrayerRepository.getHolySpiritPrayers() }
+      2 -> {
+        // ==================== TAB 2: APARTADO DEL ESPÍRITU SANTO ====================
+        val holySpiritPrayers = remember(searchQuery) {
+          if (searchQuery.isNotBlank()) {
+            PrayerRepository.searchPrayers(searchQuery, PrayerRepository.getHolySpiritPrayers())
+          } else {
+            PrayerRepository.getHolySpiritPrayers()
+          }
+        }
+
         LazyColumn(
           modifier = Modifier
             .fillMaxSize()
@@ -383,7 +624,7 @@ fun PrayersScreen(
                     color = WinePrimary
                   )
                   Text(
-                    text = "El Consolador, Abogado y Luz que guía tus pasos. Escucha y ora en cualquier instante.",
+                    text = "El Consolador, Abogado y Luz que guía tus pasos. Lee o escucha con devoción.",
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                   )
@@ -396,9 +637,9 @@ fun PrayersScreen(
             PrayerItemRow(
               prayer = prayer,
               isPlaying = currentlyPlayingPrayerId == prayer.id,
-              isFavorite = prefs.isPrayerFavorite(prayer.id),
+              isFavorite = favoritePrayersSet.contains(prayer.id),
               onPlayClick = { playOrStopPrayer(prayer) },
-              onFavoriteClick = { prefs.toggleFavoritePrayer(prayer.id) },
+              onFavoriteClick = { toggleFavorite(prayer) },
               onClick = {
                 ttsHelper.stop()
                 currentlyPlayingPrayerId = null
@@ -411,8 +652,8 @@ fun PrayersScreen(
         }
       }
 
-      2 -> {
-        // TAB 3: TODAS LAS ORACIONES
+      3 -> {
+        // ==================== TAB 3: TODAS LAS ORACIONES ====================
         val prayers = remember(searchQuery) {
           if (searchQuery.isNotBlank()) PrayerRepository.searchPrayers(searchQuery) else PrayerRepository.getAllPrayers()
         }
@@ -423,13 +664,34 @@ fun PrayersScreen(
             .widthIn(max = 600.dp),
           verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
+          item {
+            Row(
+              modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 4.dp),
+              horizontalArrangement = Arrangement.SpaceBetween,
+              verticalAlignment = Alignment.CenterVertically
+            ) {
+              Text(
+                text = "Compendio Católico Completo (${prayers.size})",
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                color = WinePrimary
+              )
+              Text(
+                text = "Toca ♡ para guardar",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+              )
+            }
+          }
+
           items(prayers, key = { it.id }) { prayer ->
             PrayerItemRow(
               prayer = prayer,
               isPlaying = currentlyPlayingPrayerId == prayer.id,
-              isFavorite = prefs.isPrayerFavorite(prayer.id),
+              isFavorite = favoritePrayersSet.contains(prayer.id),
               onPlayClick = { playOrStopPrayer(prayer) },
-              onFavoriteClick = { prefs.toggleFavoritePrayer(prayer.id) },
+              onFavoriteClick = { toggleFavorite(prayer) },
               onClick = {
                 ttsHelper.stop()
                 currentlyPlayingPrayerId = null
@@ -443,12 +705,14 @@ fun PrayersScreen(
     }
   }
 
-  // PRAYER DETAIL MODAL DIALOG
+  // ==================== PRAYER DETAIL MODAL DIALOG ====================
   activePrayerDetail?.let { prayer ->
     var isLatinView by remember { mutableStateOf(false) }
-    var fontScale by remember { mutableIntStateOf(16) }
+    // Initialize font scale based on the user's saved system font scale preference
+    val defaultFont = (16 * prefs.getFontSize()).toInt().coerceIn(14, 26)
+    var fontScale by remember { mutableIntStateOf(defaultFont) }
     var prayerCounter by remember { mutableIntStateOf(0) }
-    val isFav = prefs.isPrayerFavorite(prayer.id)
+    val isFav = favoritePrayersSet.contains(prayer.id)
 
     val currentContent = if (isLatinView && prayer.latinContent != null) {
       prayer.latinContent
@@ -470,25 +734,43 @@ fun PrayersScreen(
             activePrayerDetail = null
           }
         ) {
-          Text("Cerrar")
+          Text(
+            text = "Cerrar",
+            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+            color = WinePrimary
+          )
         }
       },
       title = {
         Column {
-          Text(
-            text = prayer.title,
-            style = MaterialTheme.typography.titleLarge.copy(
-              fontWeight = FontWeight.Bold,
-              fontFamily = FontFamily.Serif
-            ),
-            color = MaterialTheme.colorScheme.onSurface
-          )
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+          ) {
+            Text(
+              text = prayer.title,
+              style = MaterialTheme.typography.titleLarge.copy(
+                fontWeight = FontWeight.Bold,
+                fontFamily = FontFamily.Serif
+              ),
+              color = MaterialTheme.colorScheme.onSurface,
+              modifier = Modifier.weight(1f)
+            )
+            IconButton(onClick = { toggleFavorite(prayer) }) {
+              Icon(
+                imageVector = if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
+                contentDescription = if (isFav) "Quitar de favoritas" else "Añadir a favoritas",
+                tint = if (isFav) WinePrimary else MaterialTheme.colorScheme.outline
+              )
+            }
+          }
           prayer.latinTitle?.let {
             Text(
               text = it,
               style = MaterialTheme.typography.labelMedium,
               fontStyle = FontStyle.Italic,
-              color = MaterialTheme.colorScheme.secondary
+              color = GoldSecondary
             )
           }
         }
@@ -512,7 +794,7 @@ fun PrayersScreen(
                 Text(
                   text = if (isLatinView) "Ver en Español" else "Ver en Latín",
                   style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.primary,
+                  color = WinePrimary,
                   modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                 )
               }
@@ -524,7 +806,7 @@ fun PrayersScreen(
               Text(
                 text = "A-",
                 modifier = Modifier
-                  .clickable { if (fontScale > 13) fontScale -= 2 }
+                  .clickable { if (fontScale > 12) fontScale -= 2 }
                   .padding(horizontal = 6.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Bold
@@ -532,7 +814,7 @@ fun PrayersScreen(
               Text(
                 text = "A+",
                 modifier = Modifier
-                  .clickable { if (fontScale < 24) fontScale += 2 }
+                  .clickable { if (fontScale < 26) fontScale += 2 }
                   .padding(horizontal = 6.dp, vertical = 4.dp),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
@@ -551,7 +833,7 @@ fun PrayersScreen(
               ) {
                 Icon(
                   imageVector = if (currentlyPlayingPrayerId == prayer.id) Icons.Default.Stop else Icons.Default.PlayArrow,
-                  contentDescription = "Escuchar oración",
+                  contentDescription = "Escuchar oración con Voz Viva",
                   tint = if (currentlyPlayingPrayerId == prayer.id) WinePrimary else MaterialTheme.colorScheme.primary
                 )
               }
@@ -570,7 +852,7 @@ fun PrayersScreen(
 
           Spacer(modifier = Modifier.height(10.dp))
 
-          // Interactive Bead Counter
+          // Interactive Bead Counter (Buttons with white text and icon for high contrast in dark mode)
           if (prayer.hasCounter) {
             Surface(
               shape = RoundedCornerShape(14.dp),
@@ -599,7 +881,7 @@ fun PrayersScreen(
                   )
                 }
 
-                Row {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                   IconButton(onClick = { prayerCounter = 0 }) {
                     Icon(imageVector = Icons.Default.Refresh, contentDescription = "Reiniciar")
                   }
@@ -607,12 +889,24 @@ fun PrayersScreen(
                     onClick = {
                       if (prayerCounter < prayer.counterTotal) prayerCounter++
                     },
-                    colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+                    colors = ButtonDefaults.buttonColors(
+                      containerColor = WinePrimary,
+                      contentColor = Color.White
+                    ),
                     shape = RoundedCornerShape(10.dp)
                   ) {
-                    Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
+                    Icon(
+                      imageVector = Icons.Default.Add,
+                      contentDescription = null,
+                      modifier = Modifier.size(16.dp),
+                      tint = Color.White
+                    )
                     Spacer(modifier = Modifier.width(4.dp))
-                    Text("Rezar cuenta")
+                    Text(
+                      text = "Rezar cuenta",
+                      color = Color.White,
+                      fontWeight = FontWeight.Bold
+                    )
                   }
                 }
               }
@@ -687,7 +981,9 @@ fun PrayerItemRow(
             fontWeight = FontWeight.Bold,
             fontFamily = FontFamily.Serif
           ),
-          color = MaterialTheme.colorScheme.onSurface
+          color = MaterialTheme.colorScheme.onSurface,
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis
         )
 
         prayer.latinTitle?.let {
@@ -695,7 +991,9 @@ fun PrayerItemRow(
             text = it,
             style = MaterialTheme.typography.labelSmall,
             fontStyle = FontStyle.Italic,
-            color = GoldSecondary
+            color = GoldSecondary,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
           )
         }
 
@@ -705,18 +1003,19 @@ fun PrayerItemRow(
           text = prayer.description,
           style = MaterialTheme.typography.bodySmall,
           color = MaterialTheme.colorScheme.onSurfaceVariant,
-          maxLines = 2
+          maxLines = 2,
+          overflow = TextOverflow.Ellipsis
         )
       }
 
-      // Quick Audio Play Button
+      // Quick Audio Play Button (Voz Viva)
       IconButton(
         onClick = onPlayClick,
         modifier = Modifier.size(42.dp)
       ) {
         Icon(
           imageVector = if (isPlaying) Icons.Default.Stop else Icons.Default.PlayArrow,
-          contentDescription = if (isPlaying) "Detener audio" else "Escuchar oración",
+          contentDescription = if (isPlaying) "Detener audio" else "Escuchar oración con Voz Viva",
           tint = if (isPlaying) WinePrimary else MaterialTheme.colorScheme.primary
         )
       }
@@ -728,7 +1027,7 @@ fun PrayerItemRow(
       ) {
         Icon(
           imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
-          contentDescription = "Favorito",
+          contentDescription = if (isFavorite) "Quitar de favoritas" else "Marcar como favorita",
           tint = if (isFavorite) WinePrimary else MaterialTheme.colorScheme.outline
         )
       }

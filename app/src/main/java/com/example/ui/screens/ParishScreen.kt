@@ -133,12 +133,15 @@ fun ParishScreen(
       modifier = Modifier
         .fillMaxWidth()
         .widthIn(max = 600.dp),
-      colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+      colors = ButtonDefaults.buttonColors(
+        containerColor = WinePrimary,
+        contentColor = Color.White
+      ),
       shape = RoundedCornerShape(12.dp)
     ) {
       Icon(imageVector = Icons.Default.NearMe, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
       Spacer(modifier = Modifier.width(8.dp))
-      Text("Buscar iglesias católicas cerca de mí en Google Maps", color = Color.White)
+      Text("Buscar iglesias católicas cerca de mí en Google Maps", color = Color.White, fontWeight = FontWeight.Bold)
     }
 
     Spacer(modifier = Modifier.height(8.dp))

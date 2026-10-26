@@ -91,7 +91,7 @@ fun AuthLockScreen(
     if (activity != null && canUseBiometrics) {
       BiometricHelper.showBiometricPrompt(
         activity = activity,
-        title = "Acceso a Dios Te Dice",
+        title = "Acceso a Dios Te Dice Hoy",
         subtitle = "Identifícate con tu huella dactilar",
         negativeButtonText = "Usar PIN de 4 dígitos",
         onSuccess = {

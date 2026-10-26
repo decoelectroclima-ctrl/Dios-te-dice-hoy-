@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import com.example.model.ConfessionItem
 import com.example.model.HandOfGodEntry
+import com.example.model.SpotifyPlaylist
 import org.json.JSONArray
 import org.json.JSONObject
 
@@ -48,7 +49,7 @@ class UserPreferences(context: Context) {
 
   // --- Bible Version ---
   fun getBibleVersion(): String {
-    return prefs.getString(KEY_BIBLE_VERSION, "DHHED") ?: "DHHED"
+    return prefs.getString(KEY_BIBLE_VERSION, "JERUSALEN") ?: "JERUSALEN"
   }
 
   fun setBibleVersion(version: String) {
@@ -56,7 +57,8 @@ class UserPreferences(context: Context) {
   }
 
   fun getInstalledVersions(): Set<String> {
-    return prefs.getStringSet(KEY_INSTALLED_VERSIONS, setOf("DHHED")) ?: setOf("DHHED")
+    return prefs.getStringSet(KEY_INSTALLED_VERSIONS, setOf("JERUSALEN", "TORRES_AMAT", "LATINOAMERICANA", "DHHED", "RVR1960"))
+      ?: setOf("JERUSALEN", "TORRES_AMAT", "LATINOAMERICANA", "DHHED", "RVR1960")
   }
 
   fun addInstalledVersion(version: String) {
@@ -117,11 +119,12 @@ class UserPreferences(context: Context) {
   }
 
   fun getFontSize(): Float {
-    return prefs.getFloat(KEY_FONT_SIZE, 16f)
+    val size = prefs.getFloat(KEY_FONT_SIZE, 1.0f)
+    return if (size < 0.5f || size > 2.0f) 1.0f else size
   }
 
   fun setFontSize(size: Float) {
-    prefs.edit().putFloat(KEY_FONT_SIZE, size).apply()
+    prefs.edit().putFloat(KEY_FONT_SIZE, size.coerceIn(0.8f, 1.5f)).apply()
   }
 
   // --- Theme Mode ---
@@ -362,5 +365,83 @@ class UserPreferences(context: Context) {
   fun removeHandOfGodEntry(id: String) {
     val current = getHandOfGodEntries().filter { it.id != id }
     saveHandOfGodEntries(current)
+  }
+
+  // --- Bible PDF & Reader State ---
+  fun getLastBiblePage(): Int {
+    return prefs.getInt("key_last_bible_page", 0)
+  }
+
+  fun setLastBiblePage(page: Int) {
+    prefs.edit().putInt("key_last_bible_page", page.coerceAtLeast(0)).apply()
+  }
+
+  fun getBibleReaderMode(): String {
+    return prefs.getString("key_bible_reader_mode", "BOOK") ?: "BOOK"
+  }
+
+  fun setBibleReaderMode(mode: String) {
+    prefs.edit().putString("key_bible_reader_mode", mode).apply()
+  }
+
+  fun isBibleDarkMode(): Boolean {
+    return prefs.getBoolean("key_bible_dark_mode", false)
+  }
+
+  fun setBibleDarkMode(enabled: Boolean) {
+    prefs.edit().putBoolean("key_bible_dark_mode", enabled).apply()
+  }
+
+  // --- Spotify Custom Playlists ---
+  fun getCustomSpotifyPlaylists(): List<SpotifyPlaylist> {
+    val jsonStr = prefs.getString("custom_spotify_playlists_json", null) ?: return emptyList()
+    return try {
+      val array = JSONArray(jsonStr)
+      val list = mutableListOf<SpotifyPlaylist>()
+      for (i in 0 until array.length()) {
+        val obj = array.getJSONObject(i)
+        list.add(
+          SpotifyPlaylist(
+            id = obj.getString("id"),
+            title = obj.getString("title"),
+            description = obj.optString("description", ""),
+            spotifyUrl = obj.getString("spotifyUrl"),
+            category = obj.optString("category", "Personal"),
+            isCustom = true,
+            emoji = obj.optString("emoji", "🎵")
+          )
+        )
+      }
+      list
+    } catch (_: Exception) {
+      emptyList()
+    }
+  }
+
+  fun saveCustomSpotifyPlaylists(playlists: List<SpotifyPlaylist>) {
+    val array = JSONArray()
+    for (item in playlists) {
+      val obj = JSONObject().apply {
+        put("id", item.id)
+        put("title", item.title)
+        put("description", item.description)
+        put("spotifyUrl", item.spotifyUrl)
+        put("category", item.category)
+        put("emoji", item.emoji)
+      }
+      array.put(obj)
+    }
+    prefs.edit().putString("custom_spotify_playlists_json", array.toString()).apply()
+  }
+
+  fun addCustomSpotifyPlaylist(playlist: SpotifyPlaylist) {
+    val current = getCustomSpotifyPlaylists().toMutableList()
+    current.add(0, playlist)
+    saveCustomSpotifyPlaylists(current)
+  }
+
+  fun removeCustomSpotifyPlaylist(id: String) {
+    val current = getCustomSpotifyPlaylists().filter { it.id != id }
+    saveCustomSpotifyPlaylists(current)
   }
 }

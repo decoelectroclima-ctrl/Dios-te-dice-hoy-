@@ -45,7 +45,7 @@ fun HolySpiritScreen(modifier: Modifier = Modifier) {
         item {
             Text("Invocación", style = MaterialTheme.typography.titleMedium, color = GoldSecondary)
             Text(
-                "¡Oh Espíritu Santo, Amor del Padre y del Hijo! Inspírame siempre lo que debo pensar, lo que debo decir, cómo debo decirlo, lo que debo callar, lo que debo escribir, cómo debo actuar, para procurar tu gloria, el bien de las almas y mi propia santificación.",
+                "Oh Espíritu Santo, Amor del Padre y del Hijo,\ninspírame siempre lo que debo pensar,\nlo que debo decir, cómo debo decirlo,\nlo que debo callar, cómo debo actuar,\nlo que debo hacer, para gloria de Dios,\nbien de las almas y mi propia santificación.\nEspíritu Santo, dame agudeza para entender,\ncapacidad para retener, método y facultad para aprender,\nlucidez para interpretar y gracia abundante para hablar.\nDame acierto al empezar, dirección al progresar\ny perfección al acabar. Amén.",
                 style = MaterialTheme.typography.bodyMedium
             )
         }
