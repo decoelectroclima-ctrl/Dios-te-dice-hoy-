@@ -75,7 +75,7 @@ object NotificationHelper {
       )
 
       val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_launcher_img)
+        .setSmallIcon(R.drawable.ic_stat_cross)
         .setContentTitle("Dios te dice hoy ✨")
         .setContentText("${verse.citation}: «${verse.godSaysToday}»")
         .setStyle(
@@ -113,7 +113,7 @@ object NotificationHelper {
       )
 
       val notification = NotificationCompat.Builder(context, NIGHT_CHANNEL_ID)
-        .setSmallIcon(R.drawable.ic_launcher_img)
+        .setSmallIcon(R.drawable.ic_stat_cross)
         .setContentTitle("¿Dónde notaste hoy la mano de Dios? 🕊️")
         .setContentText("Dedica 2 minutos a recordar su gracia, agradecer y anotar las bendiciones de hoy.")
         .setStyle(

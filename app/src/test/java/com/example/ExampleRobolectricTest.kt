@@ -25,7 +25,14 @@ class ExampleRobolectricTest {
   fun `read string from context`() {
     val context = ApplicationProvider.getApplicationContext<Context>()
     val appName = context.getString(R.string.app_name)
-    assertEquals("Dios Te Dice", appName)
+    assertEquals("Dios Te Dice Hoy", appName)
+  }
+
+  @Test
+  fun `launch main activity successfully`() {
+    val controller = org.robolectric.Robolectric.buildActivity(MainActivity::class.java)
+    controller.create().start().resume()
+    assertNotNull(controller.get())
   }
 
   @Test

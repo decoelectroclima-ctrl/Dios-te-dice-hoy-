@@ -9,12 +9,16 @@ import androidx.fragment.app.FragmentActivity
 object BiometricHelper {
 
   fun isBiometricAvailable(context: Context): Boolean {
-    val biometricManager = BiometricManager.from(context)
-    return when (biometricManager.canAuthenticate(
-      BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
-    )) {
-      BiometricManager.BIOMETRIC_SUCCESS -> true
-      else -> false
+    return try {
+      val biometricManager = BiometricManager.from(context)
+      when (biometricManager.canAuthenticate(
+        BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.BIOMETRIC_WEAK
+      )) {
+        BiometricManager.BIOMETRIC_SUCCESS -> true
+        else -> false
+      }
+    } catch (_: Throwable) {
+      false
     }
   }
 
@@ -26,38 +30,39 @@ object BiometricHelper {
     onSuccess: () -> Unit,
     onError: (String) -> Unit
   ) {
-    val executor = ContextCompat.getMainExecutor(activity)
-    val biometricPrompt = BiometricPrompt(
-      activity,
-      executor,
-      object : BiometricPrompt.AuthenticationCallback() {
-        override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
-          super.onAuthenticationSucceeded(result)
-          onSuccess()
-        }
-
-        override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
-          super.onAuthenticationError(errorCode, errString)
-          onError(errString.toString())
-        }
-
-        override fun onAuthenticationFailed() {
-          super.onAuthenticationFailed()
-          onError("Huella no reconocida. Intenta de nuevo o ingresa el PIN.")
-        }
-      }
-    )
-
-    val promptInfo = BiometricPrompt.PromptInfo.Builder()
-      .setTitle(title)
-      .setSubtitle(subtitle)
-      .setNegativeButtonText(negativeButtonText)
-      .build()
-
     try {
+      val executor = ContextCompat.getMainExecutor(activity)
+      val biometricPrompt = BiometricPrompt(
+        activity,
+        executor,
+        object : BiometricPrompt.AuthenticationCallback() {
+          override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+            super.onAuthenticationSucceeded(result)
+            onSuccess()
+          }
+
+          override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+            super.onAuthenticationError(errorCode, errString)
+            onError(errString.toString())
+          }
+
+          override fun onAuthenticationFailed() {
+            super.onAuthenticationFailed()
+            onError("Huella no reconocida. Intenta de nuevo o ingresa el PIN.")
+          }
+        }
+      )
+
+      val promptInfo = BiometricPrompt.PromptInfo.Builder()
+        .setTitle(title)
+        .setSubtitle(subtitle)
+        .setNegativeButtonText(negativeButtonText)
+        .build()
+
       biometricPrompt.authenticate(promptInfo)
-    } catch (e: Exception) {
-      onError("No se pudo iniciar la autenticación biométrica: ${e.localizedMessage}")
+    } catch (e: Throwable) {
+      onError("No se pudo iniciar la autenticación biométrica: ${e.localizedMessage ?: "error"}")
     }
   }
 }
+

@@ -25,7 +25,7 @@ object HeartbeatSynth {
             val secPerCycle = 60.0 / safeBpm
             val sistole = (0.30 - (safeBpm - 60) * 0.0011).coerceIn(0.18, 0.32)
             val numSamplesPerCycle = (secPerCycle * sampleRate).toInt()
-            val totalSamples = (numSamplesPerCycle * beats).coerceIn(100, 88200)
+            val totalSamples = (numSamplesPerCycle * beats).coerceIn(100, 441000)
             val buffer = FloatArray(totalSamples)
 
             for (b in 0 until beats) {

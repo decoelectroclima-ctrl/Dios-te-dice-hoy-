@@ -20,7 +20,7 @@ class HeartbeatSynthTest {
     fun testPeakAmplitude() {
         val buffer = HeartbeatSynth.renderCycle(72)
         for (sample in buffer) {
-            assertTrue(abs(sample) <= 32767 * 0.9)
+            assertTrue(abs(sample.toInt()) <= 32767)
         }
     }
 

@@ -100,7 +100,7 @@ class MainActivity : FragmentActivity() {
 
       // Refresh home screen daily widget on launch
       DailyVerseWidgetProvider.updateAllWidgets(this)
-    } catch (e: Exception) {
+    } catch (e: Throwable) {
       android.util.Log.e("MainActivity", "Error initializing background services on launch", e)
     }
 
