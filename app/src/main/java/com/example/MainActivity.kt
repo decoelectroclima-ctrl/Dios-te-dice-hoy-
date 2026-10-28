@@ -107,6 +107,7 @@ class MainActivity : FragmentActivity() {
     val openTabExtra = intent?.getStringExtra("OPEN_TAB")
 
     setContent {
+      android.util.Log.e("MainActivity", "Starting setContent")
       val context = LocalContext.current
       val userPrefs = remember { UserPreferences(context) }
       var currentThemeMode by remember { mutableStateOf(userPrefs.getThemeMode()) }
@@ -159,6 +160,7 @@ fun MainAppContent(
   onThemeModeChanged: (String) -> Unit,
   onFontSizeChanged: (Float) -> Unit
 ) {
+  android.util.Log.e("MainAppContent", "Starting MainAppContent")
   val context = LocalContext.current
   val userPrefs = remember { UserPreferences(context) }
   val snackbarHostState = remember { SnackbarHostState() }

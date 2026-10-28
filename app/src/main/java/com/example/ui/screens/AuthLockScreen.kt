@@ -74,6 +74,7 @@ fun AuthLockScreen(
   onUnlocked: () -> Unit,
   onCancel: (() -> Unit)? = null
 ) {
+  android.util.Log.e("AuthLockScreen", "Starting AuthLockScreen, mode: $mode")
   val context = LocalContext.current
   val prefs = remember { UserPreferences(context) }
   val activity = context as? FragmentActivity

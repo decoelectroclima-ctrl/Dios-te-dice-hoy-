@@ -10,6 +10,7 @@ class BibleRepository(context: Context) {
     private val prefs = UserPreferences(context)
 
     suspend fun getVerses(versionOverride: String? = null): List<BibleVerseEntity> {
+    try {
         val version = versionOverride ?: prefs.getBibleVersion()
         val verses = bibleDao.getVersesByVersion(version)
         if (verses.isEmpty() || verses.size <= 2) {
@@ -18,6 +19,10 @@ class BibleRepository(context: Context) {
             return fullCollection
         }
         return verses
+    } catch (e: Exception) {
+        android.util.Log.e("BibleRepository", "Error getting verses", e)
+        throw e
+    }
     }
 
     suspend fun downloadVerses(version: String, verses: List<BibleVerseEntity>) {

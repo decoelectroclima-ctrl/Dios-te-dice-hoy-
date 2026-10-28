@@ -41,6 +41,8 @@ class DailyVerseReceiver : BroadcastReceiver() {
       }
       // Update daily widget whenever morning cycle triggers
       DailyVerseWidgetProvider.updateAllWidgets(context)
-    } catch (_: Throwable) {}
+    } catch (e: Throwable) {
+      android.util.Log.e("DailyVerseReceiver", "Error in onReceive", e)
+    }
   }
 }
