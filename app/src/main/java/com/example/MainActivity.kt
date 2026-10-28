@@ -87,18 +87,22 @@ class MainActivity : FragmentActivity() {
     super.onCreate(savedInstanceState)
     enableEdgeToEdge()
 
-    // Initialize notification channels and schedule morning & night alarms
-    NotificationHelper.createNotificationChannels(this)
-    val prefs = UserPreferences(this)
-    if (prefs.isNotificationEnabled()) {
-      NotificationHelper.scheduleDailyAlarm(this)
-    }
-    if (prefs.isNightNotificationEnabled()) {
-      NotificationHelper.scheduleNightAlarm(this)
-    }
+    try {
+      // Initialize notification channels and schedule morning & night alarms
+      NotificationHelper.createNotificationChannels(this)
+      val prefs = UserPreferences(this)
+      if (prefs.isNotificationEnabled()) {
+        NotificationHelper.scheduleDailyAlarm(this)
+      }
+      if (prefs.isNightNotificationEnabled()) {
+        NotificationHelper.scheduleNightAlarm(this)
+      }
 
-    // Refresh home screen daily widget on launch
-    DailyVerseWidgetProvider.updateAllWidgets(this)
+      // Refresh home screen daily widget on launch
+      DailyVerseWidgetProvider.updateAllWidgets(this)
+    } catch (e: Exception) {
+      android.util.Log.e("MainActivity", "Error initializing background services on launch", e)
+    }
 
     val openTabExtra = intent?.getStringExtra("OPEN_TAB")
 
@@ -163,6 +167,29 @@ fun MainAppContent(
   var subScreen by remember { mutableStateOf<SubScreen?>(initialSubScreen) }
   var prayersInitialPurpose by remember { mutableStateOf<PrayerPurpose?>(null) }
 
+  // Request notification permission on Android 13+ upon launching
+  if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+      contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+    ) { granted ->
+      if (granted) {
+        scope.launch {
+          snackbarHostState.showSnackbar("¡Permiso de notificaciones concedido!")
+        }
+      }
+    }
+
+    androidx.compose.runtime.LaunchedEffect(Unit) {
+      if (androidx.core.content.ContextCompat.checkSelfPermission(
+          context,
+          android.Manifest.permission.POST_NOTIFICATIONS
+        ) != android.content.pm.PackageManager.PERMISSION_GRANTED
+      ) {
+        permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+      }
+    }
+  }
+
   // Handle hardware / gesture back button
   BackHandler(enabled = subScreen != null || currentTabIndex != 0) {
     if (subScreen != null) {
@@ -181,7 +208,7 @@ fun MainAppContent(
       NavigationDestination(
         title = "Liturgia",
         icon = Icons.Default.MenuBook,
-        subtitle = "La Misa de Cada Día y Misalito"
+        subtitle = "Calendario, Santoral y Santa Misa"
       ),
       NavigationDestination(
         title = "Oraciones",

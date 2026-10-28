@@ -10,7 +10,7 @@ class HeartbeatPlayer {
     private var audioTrack: AudioTrack? = null
     private var isPlaying = AtomicBoolean(false)
     private var currentBpm: Int = 72
-    private val scope = CoroutineScope(Dispatchers.Default + Job())
+    private val scope = CoroutineScope(Dispatchers.Default + SupervisorJob() + CoroutineExceptionHandler { _, _ -> })
 
     fun start(bpm: Int) {
         if (isPlaying.getAndSet(true)) return
@@ -19,7 +19,11 @@ class HeartbeatPlayer {
         scope.launch {
             try {
                 val pcmData = HeartbeatSynth.renderCycle(currentBpm)
-                audioTrack = AudioTrack.Builder()
+                if (pcmData.isEmpty()) {
+                    isPlaying.set(false)
+                    return@launch
+                }
+                val track = AudioTrack.Builder()
                     .setAudioAttributes(
                         AudioAttributes.Builder()
                             .setUsage(AudioAttributes.USAGE_MEDIA)
@@ -37,12 +41,16 @@ class HeartbeatPlayer {
                     .setTransferMode(AudioTrack.MODE_STATIC)
                     .build()
 
-                audioTrack?.apply {
-                    write(pcmData, 0, pcmData.size)
-                    setLoopPoints(0, pcmData.size, -1)
-                    play()
+                if (track.state == AudioTrack.STATE_INITIALIZED) {
+                    track.write(pcmData, 0, pcmData.size)
+                    track.setLoopPoints(0, pcmData.size, -1)
+                    track.play()
+                    audioTrack = track
+                } else {
+                    track.release()
+                    isPlaying.set(false)
                 }
-            } catch (e: Exception) {
+            } catch (_: Throwable) {
                 isPlaying.set(false)
             }
         }
@@ -55,30 +63,24 @@ class HeartbeatPlayer {
 
     fun setBpm(bpm: Int) {
         if (!isPlaying.get()) return
-        // Simplificación: parar y reiniciar con nuevo BPM
         stop()
         start(bpm)
     }
 
     fun setVolume(volume: Float) {
-        audioTrack?.setVolume(volume.coerceIn(0.0f, 0.8f))
+        try {
+            audioTrack?.setVolume(volume.coerceIn(0.0f, 0.8f))
+        } catch (_: Throwable) {}
     }
 
     fun release() {
-        audioTrack?.apply {
-            try {
+        try {
+            audioTrack?.apply {
                 stop()
                 release()
-            } catch (e: Exception) {}
-        }
+            }
+        } catch (_: Throwable) {}
         audioTrack = null
+        isPlaying.set(false)
     }
 }
-/*
-Ejemplo de uso en un ViewModel o Composable:
-val heartbeatPlayer = remember { HeartbeatPlayer() }
-DisposableEffect(Unit) {
-    heartbeatPlayer.start(72)
-    onDispose { heartbeatPlayer.release() }
-}
-*/

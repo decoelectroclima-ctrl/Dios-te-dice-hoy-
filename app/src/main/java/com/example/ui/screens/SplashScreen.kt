@@ -49,28 +49,20 @@ fun SplashScreen(
   val scale = remember { Animatable(1.04f) }
 
   val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-  val player = remember { com.example.util.HeartbeatPlayer() }
-
-  DisposableEffect(Unit) {
-    onDispose { player.release() }
-  }
 
   LaunchedEffect(Unit) {
-    // Trigger haptic feedback on start
-    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-    
-    // Play synthetic heartbeat
-    player.start(72)
-    
+    try {
+      haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+    } catch (_: Throwable) {}
+
     alpha.animateTo(
       targetValue = 1f,
-      animationSpec = tween(durationMillis = 800)
+      animationSpec = tween(durationMillis = 600)
     )
     scale.animateTo(
       targetValue = 1.0f,
-      animationSpec = tween(durationMillis = 5000, easing = LinearEasing)
+      animationSpec = tween(durationMillis = 1400, easing = LinearEasing)
     )
-    delay(400)
     onFinish()
   }
 

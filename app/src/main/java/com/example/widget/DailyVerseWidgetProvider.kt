@@ -34,44 +34,48 @@ class DailyVerseWidgetProvider : AppWidgetProvider() {
       appWidgetManager: AppWidgetManager,
       appWidgetId: Int
     ) {
-      val verse = VerseRepository.getDailyVerse()
-      val sdf = SimpleDateFormat("EEEE, d 'de' MMMM", Locale("es", "ES"))
-      val formattedDate = sdf.format(Date()).replaceFirstChar { it.uppercase() }
+      try {
+        val verse = VerseRepository.getDailyVerse()
+        val sdf = SimpleDateFormat("EEEE, d 'de' MMMM", Locale("es", "ES"))
+        val formattedDate = sdf.format(Date()).replaceFirstChar { it.uppercase() }
 
-      val views = RemoteViews(context.packageName, R.layout.widget_daily_verse).apply {
-        setTextViewText(R.id.widget_date, formattedDate)
-        setTextViewText(R.id.widget_god_says, "«${verse.godSaysToday}»")
-        setTextViewText(R.id.widget_verse_text, verse.text)
-        setTextViewText(R.id.widget_citation, "— ${verse.citation}")
+        val views = RemoteViews(context.packageName, R.layout.widget_daily_verse).apply {
+          setTextViewText(R.id.widget_date, formattedDate)
+          setTextViewText(R.id.widget_god_says, "«${verse.godSaysToday}»")
+          setTextViewText(R.id.widget_verse_text, verse.text)
+          setTextViewText(R.id.widget_citation, "— ${verse.citation}")
 
-        // Intent to launch MainActivity when clicking anywhere on the widget
-        val intent = Intent(context, MainActivity::class.java).apply {
-          flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-          putExtra("TARGET_VERSE_ID", verse.id)
+          // Intent to launch MainActivity when clicking anywhere on the widget
+          val intent = Intent(context, MainActivity::class.java).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            putExtra("TARGET_VERSE_ID", verse.id)
+          }
+
+          val pendingIntent = PendingIntent.getActivity(
+            context,
+            appWidgetId,
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+          )
+
+          setOnClickPendingIntent(R.id.widget_root, pendingIntent)
         }
 
-        val pendingIntent = PendingIntent.getActivity(
-          context,
-          appWidgetId,
-          intent,
-          PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        setOnClickPendingIntent(R.id.widget_root, pendingIntent)
-      }
-
-      appWidgetManager.updateAppWidget(appWidgetId, views)
+        appWidgetManager.updateAppWidget(appWidgetId, views)
+      } catch (_: Throwable) {}
     }
 
     fun updateAllWidgets(context: Context) {
-      val appWidgetManager = AppWidgetManager.getInstance(context)
-      val thisWidget = ComponentName(context, DailyVerseWidgetProvider::class.java)
-      val allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget)
-      if (allWidgetIds.isNotEmpty()) {
-        for (widgetId in allWidgetIds) {
-          updateAppWidget(context, appWidgetManager, widgetId)
+      try {
+        val appWidgetManager = AppWidgetManager.getInstance(context) ?: return
+        val thisWidget = ComponentName(context, DailyVerseWidgetProvider::class.java)
+        val allWidgetIds = appWidgetManager.getAppWidgetIds(thisWidget) ?: return
+        if (allWidgetIds.isNotEmpty()) {
+          for (widgetId in allWidgetIds) {
+            updateAppWidget(context, appWidgetManager, widgetId)
+          }
         }
-      }
+      } catch (_: Throwable) {}
     }
   }
 

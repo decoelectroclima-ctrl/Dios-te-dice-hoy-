@@ -510,7 +510,7 @@ fun HomeScreen(
 
           Column(modifier = Modifier.weight(1f)) {
             Text(
-              text = "La Misa de Hoy y el Misalito",
+              text = "Calendario Litúrgico, Santoral y Santa Misa",
               style = MaterialTheme.typography.titleMedium.copy(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
@@ -518,7 +518,7 @@ fun HomeScreen(
               color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-              text = "Lecturas bíblicas, Salmo, Evangelio del día y el Ordinario completo de la Santa Misa.",
+              text = "Consulta el calendario mensual, el santoral del día y las lecturas de la Misa",
               style = MaterialTheme.typography.bodySmall,
               color = MaterialTheme.colorScheme.onSurfaceVariant
             )

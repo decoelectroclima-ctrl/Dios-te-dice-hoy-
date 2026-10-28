@@ -84,9 +84,20 @@ fun LiturgyScreen(
 
   LaunchedEffect(isAutoScrolling) {
     if (isAutoScrolling) {
-      while (true) {
-        listState.animateScrollToItem(listState.firstVisibleItemIndex + 1)
-        delay(1500)
+      try {
+        while (isAutoScrolling) {
+          val totalItems = listState.layoutInfo.totalItemsCount
+          val nextIndex = listState.firstVisibleItemIndex + 1
+          if (totalItems > 0 && nextIndex < totalItems) {
+            listState.animateScrollToItem(nextIndex)
+            delay(2000)
+          } else {
+            isAutoScrolling = false
+            break
+          }
+        }
+      } catch (_: Exception) {
+        isAutoScrolling = false
       }
     }
   }
@@ -101,7 +112,7 @@ fun LiturgyScreen(
   }
 
   var selectedTabIndex by remember { mutableIntStateOf(0) }
-  val tabs = listOf("La Misa de Hoy", "El Ordinario (Misalito)")
+  val tabs = listOf("Calendario y Santoral", "La Misa de Hoy", "El Ordinario")
 
   val todayLiturgy = remember { LiturgyRepository.getTodayLiturgy() }
   val ordinaryParts = remember { LiturgyRepository.getOrdinaryOfTheMass() }
@@ -113,22 +124,25 @@ fun LiturgyScreen(
     horizontalAlignment = Alignment.CenterHorizontally
   ) {
     // Controls
-    Row(
-      modifier = Modifier
-        .fillMaxWidth()
-        .padding(vertical = 8.dp),
-      verticalAlignment = Alignment.CenterVertically
-    ) {
-      IconButton(onClick = { isAutoScrolling = !isAutoScrolling }) {
-        Icon(
-          imageVector = if (isAutoScrolling) Icons.Default.Stop else Icons.Default.PlayArrow,
-          contentDescription = "Autoscroll"
-        )
+    if (selectedTabIndex != 0) {
+      Row(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(vertical = 4.dp),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+      ) {
+        IconButton(onClick = { isAutoScrolling = !isAutoScrolling }) {
+          Icon(
+            imageVector = if (isAutoScrolling) Icons.Default.Stop else Icons.Default.PlayArrow,
+            contentDescription = "Autoscroll",
+            tint = MaterialTheme.colorScheme.primary
+          )
+        }
       }
+    } else {
+      Spacer(modifier = Modifier.height(6.dp))
     }
-
-
-    Spacer(modifier = Modifier.height(4.dp))
 
     // Sub-Tabs
     TabRow(
@@ -146,14 +160,17 @@ fun LiturgyScreen(
           onClick = {
             ttsHelper.stop()
             isSpeaking = false
+            isAutoScrolling = false
             selectedTabIndex = index
           },
           text = {
             Text(
               text = title,
-              style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal
-              )
+              style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = if (selectedTabIndex == index) FontWeight.Bold else FontWeight.Normal,
+                fontSize = 11.sp
+              ),
+              maxLines = 1
             )
           }
         )
@@ -164,6 +181,30 @@ fun LiturgyScreen(
 
     when (selectedTabIndex) {
       0 -> {
+        // TAB 0: CALENDARIO MENSUAL CATÓLICO Y SANTORAL
+        LazyColumn(
+          modifier = Modifier
+            .fillMaxSize()
+            .widthIn(max = 600.dp),
+          verticalArrangement = Arrangement.spacedBy(14.dp)
+        ) {
+          item {
+            com.example.ui.components.CatholicCalendarView(
+              snackbarHostState = snackbarHostState,
+              ttsHelper = ttsHelper,
+              isSpeaking = isSpeaking,
+              onSpeakingChange = { isSpeaking = it },
+              fontSize = fontSize,
+              onNavigateToMassToday = { selectedTabIndex = 1 }
+            )
+          }
+          item {
+            Spacer(modifier = Modifier.height(24.dp))
+          }
+        }
+      }
+
+      1 -> {
         // TAB 1: LA MISA DE HOY (LECTURAS LITÚRGICAS)
         LazyColumn(
           state = listState,
@@ -450,7 +491,7 @@ fun LiturgyScreen(
         }
       }
 
-      1 -> {
+      2 -> {
         // TAB 2: EL ORDINARIO DE LA MISA (MISALITO COMPLETO PARA LAICOS)
         var showLatin by remember { mutableStateOf(false) }
 

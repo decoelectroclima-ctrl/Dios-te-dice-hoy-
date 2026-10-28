@@ -59,74 +59,78 @@ object NotificationHelper {
 
   // --- Morning Notification ---
   fun showDailyNotification(context: Context, verse: BibleVerse) {
-    createNotificationChannels(context)
+    try {
+      createNotificationChannels(context)
 
-    val intent = Intent(context, MainActivity::class.java).apply {
-      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-      putExtra("TARGET_VERSE_ID", verse.id)
-    }
+      val intent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        putExtra("TARGET_VERSE_ID", verse.id)
+      }
 
-    val pendingIntent = PendingIntent.getActivity(
-      context,
-      0,
-      intent,
-      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-
-    val notification = NotificationCompat.Builder(context, CHANNEL_ID)
-      .setSmallIcon(R.drawable.ic_launcher_img)
-      .setContentTitle("Dios te dice hoy ✨")
-      .setContentText("${verse.citation}: «${verse.godSaysToday}»")
-      .setStyle(
-        NotificationCompat.BigTextStyle()
-          .setBigContentTitle("Dios te dice hoy ✨")
-          .setSummaryText(verse.citation)
-          .bigText("«${verse.godSaysToday}»\n\n${verse.text}\n— ${verse.citation}")
+      val pendingIntent = PendingIntent.getActivity(
+        context,
+        0,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
       )
-      .setPriority(NotificationCompat.PRIORITY_HIGH)
-      .setAutoCancel(true)
-      .setContentIntent(pendingIntent)
-      .build()
 
-    val notificationManager =
-      context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.notify(NOTIFICATION_ID, notification)
+      val notification = NotificationCompat.Builder(context, CHANNEL_ID)
+        .setSmallIcon(R.drawable.ic_launcher_img)
+        .setContentTitle("Dios te dice hoy ✨")
+        .setContentText("${verse.citation}: «${verse.godSaysToday}»")
+        .setStyle(
+          NotificationCompat.BigTextStyle()
+            .setBigContentTitle("Dios te dice hoy ✨")
+            .setSummaryText(verse.citation)
+            .bigText("«${verse.godSaysToday}»\n\n${verse.text}\n— ${verse.citation}")
+        )
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setAutoCancel(true)
+        .setContentIntent(pendingIntent)
+        .build()
+
+      val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      notificationManager.notify(NOTIFICATION_ID, notification)
+    } catch (_: Throwable) {}
   }
 
   // --- Night Notification: "La Mano de Dios" ---
   fun showNightNotification(context: Context) {
-    createNotificationChannels(context)
+    try {
+      createNotificationChannels(context)
 
-    val intent = Intent(context, MainActivity::class.java).apply {
-      flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
-      putExtra("OPEN_TAB", "HAND_OF_GOD")
-    }
+      val intent = Intent(context, MainActivity::class.java).apply {
+        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+        putExtra("OPEN_TAB", "HAND_OF_GOD")
+      }
 
-    val pendingIntent = PendingIntent.getActivity(
-      context,
-      1,
-      intent,
-      PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-    )
-
-    val notification = NotificationCompat.Builder(context, NIGHT_CHANNEL_ID)
-      .setSmallIcon(R.drawable.ic_launcher_img)
-      .setContentTitle("¿Dónde notaste hoy la mano de Dios? 🕊️")
-      .setContentText("Dedica 2 minutos a recordar su gracia, agradecer y anotar las bendiciones de hoy.")
-      .setStyle(
-        NotificationCompat.BigTextStyle()
-          .setBigContentTitle("¿Dónde notaste hoy la mano de Dios? 🕊️")
-          .setSummaryText("Examen de Gratitud Nocturno")
-          .bigText("«Den gracias al Señor, porque él es bueno; su gran amor perdura para siempre» (Salmo 107:1).\n\nTómate un instante antes de dormir para registrar dónde se hizo presente Dios en tu jornada.")
+      val pendingIntent = PendingIntent.getActivity(
+        context,
+        1,
+        intent,
+        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
       )
-      .setPriority(NotificationCompat.PRIORITY_HIGH)
-      .setAutoCancel(true)
-      .setContentIntent(pendingIntent)
-      .build()
 
-    val notificationManager =
-      context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-    notificationManager.notify(NIGHT_NOTIFICATION_ID, notification)
+      val notification = NotificationCompat.Builder(context, NIGHT_CHANNEL_ID)
+        .setSmallIcon(R.drawable.ic_launcher_img)
+        .setContentTitle("¿Dónde notaste hoy la mano de Dios? 🕊️")
+        .setContentText("Dedica 2 minutos a recordar su gracia, agradecer y anotar las bendiciones de hoy.")
+        .setStyle(
+          NotificationCompat.BigTextStyle()
+            .setBigContentTitle("¿Dónde notaste hoy la mano de Dios? 🕊️")
+            .setSummaryText("Examen de Gratitud Nocturno")
+            .bigText("«Den gracias al Señor, porque él es bueno; su gran amor perdura para siempre» (Salmo 107:1).\n\nTómate un instante antes de dormir para registrar dónde se hizo presente Dios en tu jornada.")
+        )
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setAutoCancel(true)
+        .setContentIntent(pendingIntent)
+        .build()
+
+      val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+      notificationManager.notify(NIGHT_NOTIFICATION_ID, notification)
+    } catch (_: Throwable) {}
   }
 
   // --- Scheduling Morning Alarm ---
@@ -163,25 +167,33 @@ object NotificationHelper {
     }
 
     try {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      val canExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        alarmManager.canScheduleExactAlarms()
+      } else {
+        true
+      }
+
+      if (canExact && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         alarmManager.setExactAndAllowWhileIdle(
           AlarmManager.RTC_WAKEUP,
           calendar.timeInMillis,
           pendingIntent
         )
       } else {
-        alarmManager.setExact(
+        alarmManager.set(
           AlarmManager.RTC_WAKEUP,
           calendar.timeInMillis,
           pendingIntent
         )
       }
-    } catch (_: SecurityException) {
-      alarmManager.set(
-        AlarmManager.RTC_WAKEUP,
-        calendar.timeInMillis,
-        pendingIntent
-      )
+    } catch (_: Exception) {
+      try {
+        alarmManager.set(
+          AlarmManager.RTC_WAKEUP,
+          calendar.timeInMillis,
+          pendingIntent
+        )
+      } catch (_: Exception) {}
     }
   }
 
@@ -196,7 +208,9 @@ object NotificationHelper {
       intent,
       PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
     )
-    alarmManager.cancel(pendingIntent)
+    try {
+      alarmManager.cancel(pendingIntent)
+    } catch (_: Exception) {}
   }
 
   // --- Scheduling Night Alarm ---
@@ -233,25 +247,33 @@ object NotificationHelper {
     }
 
     try {
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+      val canExact = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+        alarmManager.canScheduleExactAlarms()
+      } else {
+        true
+      }
+
+      if (canExact && Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
         alarmManager.setExactAndAllowWhileIdle(
           AlarmManager.RTC_WAKEUP,
           calendar.timeInMillis,
           pendingIntent
         )
       } else {
-        alarmManager.setExact(
+        alarmManager.set(
           AlarmManager.RTC_WAKEUP,
           calendar.timeInMillis,
           pendingIntent
         )
       }
-    } catch (_: SecurityException) {
-      alarmManager.set(
-        AlarmManager.RTC_WAKEUP,
-        calendar.timeInMillis,
-        pendingIntent
-      )
+    } catch (_: Exception) {
+      try {
+        alarmManager.set(
+          AlarmManager.RTC_WAKEUP,
+          calendar.timeInMillis,
+          pendingIntent
+        )
+      } catch (_: Exception) {}
     }
   }
 
