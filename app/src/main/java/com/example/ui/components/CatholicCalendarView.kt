@@ -65,6 +65,9 @@ import com.example.model.CelebrationRank
 import com.example.model.LiturgicalColor
 import com.example.ui.theme.GoldSecondary
 import com.example.ui.theme.WinePrimary
+import com.example.ui.theme.appButtonBorder
+import com.example.ui.theme.appButtonColors
+import com.example.ui.theme.appWineColor
 import com.example.util.TextToSpeechHelper
 import kotlinx.coroutines.launch
 import java.text.DateFormatSymbols
@@ -147,7 +150,7 @@ fun CatholicCalendarView(
             Icon(
               imageVector = Icons.Default.CalendarToday,
               contentDescription = null,
-              tint = WinePrimary,
+              tint = appWineColor(),
               modifier = Modifier.size(20.dp)
             )
             Spacer(modifier = Modifier.width(8.dp))
@@ -183,17 +186,19 @@ fun CatholicCalendarView(
             }
 
             // Today button
-            OutlinedButton(
+            Button(
               onClick = {
                 displayedYear = currentRealYear
                 displayedMonth = currentRealMonth
                 selectedDayNumber = currentRealDay
               },
               shape = RoundedCornerShape(8.dp),
+              colors = appButtonColors(),
+              border = appButtonBorder(),
               contentPadding = androidx.compose.foundation.layout.PaddingValues(horizontal = 8.dp, vertical = 2.dp),
               modifier = Modifier.height(30.dp)
             ) {
-              Text("Hoy", fontSize = 11.sp, fontWeight = FontWeight.Bold)
+              Text("Hoy", fontSize = 11.sp, fontWeight = FontWeight.Bold, color = Color.White)
             }
 
             // Next Month
@@ -230,7 +235,7 @@ fun CatholicCalendarView(
             Text(
               text = dayLabel,
               style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-              color = if (isSunday) WinePrimary else MaterialTheme.colorScheme.outline,
+              color = if (isSunday) appWineColor() else MaterialTheme.colorScheme.outline,
               modifier = Modifier.weight(1f),
               textAlign = TextAlign.Center
             )
@@ -268,14 +273,14 @@ fun CatholicCalendarView(
                     .clip(RoundedCornerShape(10.dp))
                     .background(
                       when {
-                        isSelected -> WinePrimary
+                        isSelected -> appWineColor()
                         isToday -> MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.5f)
                         else -> Color.Transparent
                       }
                     )
                     .border(
                       width = if (isToday && !isSelected) 1.5.dp else if (dayData.rank == CelebrationRank.SOLEMNIDAD) 1.dp else 0.dp,
-                      color = if (isToday && !isSelected) WinePrimary else if (dayData.rank == CelebrationRank.SOLEMNIDAD) GoldSecondary else Color.Transparent,
+                      color = if (isToday && !isSelected) appWineColor() else if (dayData.rank == CelebrationRank.SOLEMNIDAD) GoldSecondary else Color.Transparent,
                       shape = RoundedCornerShape(10.dp)
                     )
                     .clickable {
@@ -296,7 +301,7 @@ fun CatholicCalendarView(
                       ),
                       color = when {
                         isSelected -> Color.White
-                        isSunday -> WinePrimary
+                        isSunday -> appWineColor()
                         else -> MaterialTheme.colorScheme.onSurface
                       }
                     )
@@ -448,7 +453,7 @@ fun SelectedDayDetailCard(
           Icon(
             imageVector = if (isSpeaking) Icons.Default.Stop else Icons.Default.PlayArrow,
             contentDescription = "Escuchar el santoral y lecturas del día",
-            tint = WinePrimary
+            tint = appWineColor()
           )
         }
       }
@@ -522,7 +527,7 @@ fun SelectedDayDetailCard(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
               ),
-              color = WinePrimary
+              color = appWineColor()
             )
           }
 
@@ -622,7 +627,7 @@ fun SelectedDayDetailCard(
           Text(
             text = "✝ Santo Evangelio: ${day.gospelCitation}",
             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-            color = WinePrimary
+            color = appWineColor()
           )
           Spacer(modifier = Modifier.height(3.dp))
           Text(
@@ -698,11 +703,12 @@ fun SelectedDayDetailCard(
 
         Button(
           onClick = onNavigateToMassToday,
-          colors = ButtonDefaults.buttonColors(containerColor = WinePrimary, contentColor = Color.White),
+          colors = appButtonColors(),
+          border = appButtonBorder(),
           shape = RoundedCornerShape(10.dp),
           modifier = Modifier.weight(1f)
         ) {
-          Text("Ver Misa", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+          Text("Ver Misa", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Color.White)
         }
       }
     }

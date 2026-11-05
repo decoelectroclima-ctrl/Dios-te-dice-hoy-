@@ -45,6 +45,26 @@ class UserPreferences(context: Context) {
     private const val KEY_FONT_SIZE = "font_size"
     private const val KEY_BIBLE_VERSION = "bible_version"
     private const val KEY_INSTALLED_VERSIONS = "installed_versions"
+    private const val KEY_STUDIED_CHAPTERS = "studied_chapters"
+    private const val KEY_ANGELUS_NOTIF_ENABLED = "angelus_notif_enabled"
+    private const val KEY_TEMPLE_MODE_ENABLED = "temple_mode_enabled"
+  }
+
+  // --- Angelus & Temple Mode Preferences ---
+  fun isAngelusNotifEnabled(): Boolean {
+    return prefs.getBoolean(KEY_ANGELUS_NOTIF_ENABLED, false)
+  }
+
+  fun setAngelusNotifEnabled(enabled: Boolean) {
+    prefs.edit().putBoolean(KEY_ANGELUS_NOTIF_ENABLED, enabled).apply()
+  }
+
+  fun isTempleModeEnabled(): Boolean {
+    return prefs.getBoolean(KEY_TEMPLE_MODE_ENABLED, false)
+  }
+
+  fun setTempleModeEnabled(enabled: Boolean) {
+    prefs.edit().putBoolean(KEY_TEMPLE_MODE_ENABLED, enabled).apply()
   }
 
   // --- Bible Version ---
@@ -271,7 +291,8 @@ class UserPreferences(context: Context) {
             text = obj.getString("text"),
             category = obj.optString("category", "Falta"),
             isConfessed = obj.optBoolean("isConfessed", false),
-            dateAdded = obj.optString("dateAdded", "")
+            dateAdded = obj.optString("dateAdded", ""),
+            penance = obj.optString("penance", "")
           )
         )
       }
@@ -290,6 +311,7 @@ class UserPreferences(context: Context) {
         put("category", item.category)
         put("isConfessed", item.isConfessed)
         put("dateAdded", item.dateAdded)
+        put("penance", item.penance)
       }
       array.put(obj)
     }
@@ -443,5 +465,48 @@ class UserPreferences(context: Context) {
   fun removeCustomSpotifyPlaylist(id: String) {
     val current = getCustomSpotifyPlaylists().filter { it.id != id }
     saveCustomSpotifyPlaylists(current)
+  }
+  fun isChapterStudied(chapterId: String): Boolean {
+    return prefs.getStringSet(KEY_STUDIED_CHAPTERS, emptySet())?.contains(chapterId) == true
+  }
+
+  fun toggleChapterStudied(chapterId: String) {
+    val current = prefs.getStringSet(KEY_STUDIED_CHAPTERS, emptySet())?.toMutableSet() ?: mutableSetOf()
+    if (current.contains(chapterId)) {
+      current.remove(chapterId)
+    } else {
+      current.add(chapterId)
+    }
+    prefs.edit().putStringSet(KEY_STUDIED_CHAPTERS, current).apply()
+  }
+
+  // --- Novenas Progress and Reminders ---
+  fun getNovenaCurrentDay(novenaId: String): Int {
+    return prefs.getInt("novena_day_$novenaId", 1).coerceIn(1, 9)
+  }
+
+  fun setNovenaCurrentDay(novenaId: String, day: Int) {
+    prefs.edit().putInt("novena_day_$novenaId", day.coerceIn(1, 9)).apply()
+  }
+
+  fun isNovenaReminderEnabled(novenaId: String): Boolean {
+    return prefs.getBoolean("novena_reminder_$novenaId", false)
+  }
+
+  fun setNovenaReminderEnabled(novenaId: String, enabled: Boolean) {
+    prefs.edit().putBoolean("novena_reminder_$novenaId", enabled).apply()
+  }
+
+  fun getNovenaReminderTime(novenaId: String): Pair<Int, Int> {
+    val h = prefs.getInt("novena_time_h_$novenaId", 18)
+    val m = prefs.getInt("novena_time_m_$novenaId", 0)
+    return Pair(h, m)
+  }
+
+  fun setNovenaReminderTime(novenaId: String, hour: Int, minute: Int) {
+    prefs.edit()
+      .putInt("novena_time_h_$novenaId", hour)
+      .putInt("novena_time_m_$novenaId", minute)
+      .apply()
   }
 }

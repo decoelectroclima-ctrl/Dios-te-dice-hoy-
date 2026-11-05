@@ -4,9 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/widget_bg"
+    android:gravity="center_vertical"
     android:orientation="vertical">
 
-    <!-- Header: Badge & Date -->
+    <!-- Top Row: Badge + Citation + Sync Button -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -18,68 +19,65 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@drawable/widget_badge_bg"
-            android:text="✨ DIOS TE DICE HOY"
+            android:gravity="center"
+            android:text="🕊️ DIOS TE DICE"
             android:textColor="#FFFFFF"
-            android:textSize="10sp"
+            android:textSize="9sp"
             android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/widget_date"
+            android:id="@+id/widget_citation"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
+            android:layout_marginStart="6dp"
             android:layout_weight="1"
-            android:gravity="end"
-            android:text="Hoy"
-            android:textColor="#8B2239"
-            android:textSize="11sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            android:text="Isaías 41:10"
+            android:textColor="#6B1D2F"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/btn_sync"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="4dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:gravity="center"
+            android:paddingHorizontal="6dp"
+            android:paddingVertical="2dp"
+            android:text="↻ Sincronizar"
+            android:textColor="#6B1D2F"
+            android:textSize="10sp"
             android:textStyle="bold" />
     </LinearLayout>
 
-    <!-- God's Personal Message Today -->
-    <TextView
-        android:id="@+id/widget_god_says"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:text="«No temas, porque yo estoy contigo»"
-        android:textColor="#6B1D2F"
-        android:textSize="14sp"
-        android:textStyle="bold" />
-
-    <!-- Biblical Text -->
+    <!-- Verse Text -->
     <TextView
         android:id="@+id/widget_verse_text"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
+        android:layout_marginTop="2dp"
         android:ellipsize="end"
-        android:maxLines="3"
-        android:text="No te angusties, porque yo soy tu Dios. Te fortaleceré y te ayudaré; te sostendré con mi diestra victoriosa."
-        android:textColor="#3D3234"
-        android:textSize="12sp" />
-
-    <!-- Citation -->
-    <TextView
-        android:id="@+id/widget_citation"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="3dp"
-        android:gravity="end"
-        android:text="— Isaías 41:10"
-        android:textColor="#D4AF37"
+        android:maxLines="1"
+        android:text="«No temas, porque yo estoy contigo; no desmayes, porque yo soy tu Dios.»"
+        android:textColor="#2A2A2A"
         android:textSize="11sp"
-        android:textStyle="bold" />
+        android:textStyle="italic" />
 
-    <!-- Footer hint -->
+    <!-- God Says Today -->
     <TextView
-        android:id="@+id/widget_footer"
+        android:id="@+id/widget_god_says"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:gravity="center"
-        android:text="🕊️ Toca para rezar y abrir Dios Te Dice Hoy"
-        android:textColor="#8A7A7E"
-        android:textSize="10sp" />
+        android:layout_marginTop="1dp"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="«Suelta tus cargas y descansa en mi abrazo de Padre.»"
+        android:textColor="#6B1D2F"
+        android:textSize="10sp"
+        android:textStyle="bold" />
 
 </LinearLayout>

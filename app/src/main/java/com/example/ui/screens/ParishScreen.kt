@@ -1,6 +1,7 @@
 package com.example.ui.screens
 
 import android.Manifest
+import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -81,6 +83,12 @@ import com.example.data.ParishRepository
 import com.example.model.Parish
 import com.example.ui.theme.GoldSecondary
 import com.example.ui.theme.WinePrimary
+import com.example.ui.theme.GranateButton
+import com.example.ui.theme.GranateButtonDark
+import com.example.ui.theme.GranateButtonBorderDark
+import com.example.ui.theme.appButtonColors
+import com.example.ui.theme.appButtonBorder
+import com.example.ui.theme.appWineColor
 import com.example.util.LocationHelper
 import kotlinx.coroutines.launch
 
@@ -120,25 +128,7 @@ fun ParishScreen(
     }
   }
 
-  // Location Permission Launcher
-  val locationPermissionLauncher = rememberLauncherForActivityResult(
-    contract = ActivityResultContracts.RequestMultiplePermissions()
-  ) { permissions ->
-    val fineGranted = permissions[Manifest.permission.ACCESS_FINE_LOCATION] == true
-    val coarseGranted = permissions[Manifest.permission.ACCESS_COARSE_LOCATION] == true
-    if (fineGranted || coarseGranted) {
-      hasPermission = true
-      refreshLocation()
-      scope.launch {
-        snackbarHostState.showSnackbar("¡Ubicación activada! Ordenando iglesias por cercanía a ti.")
-      }
-    } else {
-      hasPermission = false
-      scope.launch {
-        snackbarHostState.showSnackbar("Permiso denegado. Puedes buscar iglesias y capillas manualmente.")
-      }
-    }
-  }
+
 
   LaunchedEffect(Unit) {
     if (hasPermission) {
@@ -215,7 +205,7 @@ fun ParishScreen(
             modifier = Modifier
               .size(44.dp)
               .clip(CircleShape)
-              .background(WinePrimary),
+              .background(appWineColor()),
             contentAlignment = Alignment.Center
           ) {
             Icon(
@@ -243,20 +233,36 @@ fun ParishScreen(
             Spacer(modifier = Modifier.height(8.dp))
             Button(
               onClick = {
-                locationPermissionLauncher.launch(
-                  arrayOf(
+                (context as? Activity)?.let { act ->
+                  com.example.util.PermissionBridge.request(act, arrayOf(
                     Manifest.permission.ACCESS_FINE_LOCATION,
                     Manifest.permission.ACCESS_COARSE_LOCATION
-                  )
-                )
+                  )) { res ->
+                    val fine = res[Manifest.permission.ACCESS_FINE_LOCATION] == true
+                    val coarse = res[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+                    if (fine || coarse) {
+                      hasPermission = true
+                      refreshLocation()
+                      scope.launch {
+                        snackbarHostState.showSnackbar("¡Ubicación activada! Ordenando iglesias por cercanía a ti.")
+                      }
+                    } else {
+                      hasPermission = false
+                      scope.launch {
+                        snackbarHostState.showSnackbar("Permiso denegado. Puedes buscar iglesias y capillas manualmente.")
+                      }
+                    }
+                  }
+                }
               },
-              colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+              colors = appButtonColors(),
+              border = appButtonBorder(),
               shape = RoundedCornerShape(10.dp),
               modifier = Modifier.testTag("enable_location_button")
             ) {
-              Icon(imageVector = Icons.Default.MyLocation, contentDescription = null, modifier = Modifier.size(16.dp))
+              Icon(imageVector = Icons.Default.MyLocation, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
               Spacer(modifier = Modifier.width(6.dp))
-              Text("Activar Ubicación", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+              Text("Activar Ubicación", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
             }
           }
         }
@@ -326,12 +332,13 @@ fun ParishScreen(
           }
         },
         modifier = Modifier.weight(1f),
-        colors = ButtonDefaults.buttonColors(containerColor = WinePrimary),
+        colors = appButtonColors(),
+        border = appButtonBorder(),
         shape = RoundedCornerShape(12.dp)
       ) {
-        Icon(imageVector = Icons.Default.NearMe, contentDescription = null, modifier = Modifier.size(16.dp))
+        Icon(imageVector = Icons.Default.NearMe, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
         Spacer(modifier = Modifier.width(6.dp))
-        Text("Iglesias en Maps", fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+        Text("Iglesias en Maps", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
       }
 
       Button(
@@ -343,12 +350,13 @@ fun ParishScreen(
           }
         },
         modifier = Modifier.weight(1f),
-        colors = ButtonDefaults.buttonColors(containerColor = GoldSecondary, contentColor = Color(0xFF2C1E00)),
+        colors = appButtonColors(),
+        border = appButtonBorder(),
         shape = RoundedCornerShape(12.dp)
       ) {
-        Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp))
+        Icon(imageVector = Icons.Default.AutoAwesome, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
         Spacer(modifier = Modifier.width(6.dp))
-        Text("Adoración 24h Maps", fontSize = 12.sp, fontWeight = FontWeight.Bold, maxLines = 1)
+        Text("Adoración 24h Maps", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
       }
     }
 
@@ -411,7 +419,7 @@ fun ParishScreen(
         .widthIn(max = 600.dp),
       verticalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-      items(filteredParishes, key = { it.id }) { parish ->
+      itemsIndexed(filteredParishes, key = { index, parish -> "par_${index}_${parish.id}" }) { _, parish ->
         Card(
           modifier = Modifier.fillMaxWidth(),
           shape = RoundedCornerShape(18.dp),
@@ -622,7 +630,7 @@ fun ParishScreen(
               modifier = Modifier.fillMaxWidth(),
               horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-              OutlinedButton(
+              Button(
                 onClick = {
                   ParishRepository.openInGoogleMaps(context, parish)
                   scope.launch {
@@ -630,16 +638,18 @@ fun ParishScreen(
                   }
                 },
                 modifier = Modifier.weight(1f),
+                colors = appButtonColors(),
+                border = appButtonBorder(),
                 shape = RoundedCornerShape(10.dp)
               ) {
                 Icon(
                   imageVector = Icons.Default.LocationOn,
                   contentDescription = null,
                   modifier = Modifier.size(16.dp),
-                  tint = WinePrimary
+                  tint = Color.White
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Ver en Mapa", fontSize = 12.sp)
+                Text("Ver en Mapa", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
               }
 
               Button(
@@ -650,16 +660,18 @@ fun ParishScreen(
                   }
                 },
                 modifier = Modifier.weight(1f),
-                shape = RoundedCornerShape(10.dp),
-                colors = ButtonDefaults.buttonColors(containerColor = WinePrimary)
+                colors = appButtonColors(),
+                border = appButtonBorder(),
+                shape = RoundedCornerShape(10.dp)
               ) {
                 Icon(
                   imageVector = Icons.Default.Directions,
                   contentDescription = null,
-                  modifier = Modifier.size(16.dp)
+                  modifier = Modifier.size(16.dp),
+                  tint = Color.White
                 )
                 Spacer(modifier = Modifier.width(4.dp))
-                Text("Cómo llegar", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                Text("Cómo llegar", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
               }
 
               if (parish.phone != null) {

@@ -4,6 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -30,6 +31,12 @@ import com.example.model.SpotifyCuratedPlaylists
 import com.example.model.SpotifyPlaylist
 import com.example.ui.theme.GoldSecondary
 import com.example.ui.theme.WinePrimary
+import com.example.ui.theme.GranateButton
+import com.example.ui.theme.GranateButtonDark
+import com.example.ui.theme.GranateButtonBorderDark
+import com.example.ui.theme.appButtonColors
+import com.example.ui.theme.appButtonBorder
+import com.example.ui.theme.appWineColor
 import com.example.util.SpotifyHelper
 import kotlinx.coroutines.launch
 import java.util.UUID
@@ -85,7 +92,7 @@ fun SacredMusicScreen(
             Row(verticalAlignment = Alignment.CenterVertically) {
               Surface(
                 shape = CircleShape,
-                color = WinePrimary,
+                color = appWineColor(),
                 modifier = Modifier.size(40.dp)
               ) {
                 Box(contentAlignment = Alignment.Center) {
@@ -132,15 +139,13 @@ fun SacredMusicScreen(
                 .fillMaxWidth()
                 .height(48.dp)
                 .testTag("add_spotify_playlist_button"),
-              colors = ButtonDefaults.buttonColors(
-                containerColor = WinePrimary,
-                contentColor = Color.White
-              ),
+              colors = appButtonColors(),
+              border = appButtonBorder(),
               shape = RoundedCornerShape(12.dp)
             ) {
-              Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp))
+              Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
               Spacer(modifier = Modifier.width(8.dp))
-              Text("Añadir mi Lista de Spotify", fontWeight = FontWeight.Bold, fontSize = 13.sp)
+              Text("Añadir mi Lista de Spotify", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 13.sp)
             }
           }
         }
@@ -168,7 +173,7 @@ fun SacredMusicScreen(
               onClick = { selectedCategoryFilter = code },
               label = { Text(label, fontSize = 12.sp) },
               colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = WinePrimary,
+                selectedContainerColor = appWineColor(),
                 selectedLabelColor = Color.White
               )
             )
@@ -209,7 +214,7 @@ fun SacredMusicScreen(
       }
 
       // Playlist Items
-      items(allPlaylists, key = { it.id }) { playlist ->
+      itemsIndexed(allPlaylists, key = { index, playlist -> "pl_${index}_${playlist.id}" }) { _, playlist ->
         Card(
           modifier = Modifier
             .fillMaxWidth()
@@ -335,10 +340,8 @@ fun SacredMusicScreen(
                 .fillMaxWidth()
                 .height(46.dp)
                 .testTag("play_spotify_${playlist.id}"),
-              colors = ButtonDefaults.buttonColors(
-                containerColor = WinePrimary,
-                contentColor = Color.White
-              ),
+              colors = appButtonColors(),
+              border = appButtonBorder(),
               shape = RoundedCornerShape(12.dp)
             ) {
               Icon(
@@ -385,7 +388,7 @@ fun SacredMusicScreen(
       onDismissRequest = { showAddDialog = false },
       title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
-          Icon(Icons.Default.MusicNote, contentDescription = null, tint = WinePrimary, modifier = Modifier.size(24.dp))
+          Icon(Icons.Default.MusicNote, contentDescription = null, tint = appWineColor(), modifier = Modifier.size(24.dp))
           Spacer(modifier = Modifier.width(8.dp))
           Text(
             text = "Añadir Lista de Spotify",
@@ -485,18 +488,16 @@ fun SacredMusicScreen(
               snackbarHostState.showSnackbar("✨ Lista «$title» guardada en tus listas de Spotify")
             }
           },
-          colors = ButtonDefaults.buttonColors(
-            containerColor = WinePrimary,
-            contentColor = Color.White
-          ),
+          colors = appButtonColors(),
+          border = appButtonBorder(),
           modifier = Modifier.testTag("save_spotify_playlist_button")
         ) {
-          Text("Guardar Lista", fontWeight = FontWeight.Bold)
+          Text("Guardar Lista", color = Color.White, fontWeight = FontWeight.Bold)
         }
       },
       dismissButton = {
         TextButton(onClick = { showAddDialog = false }) {
-          Text("Cancelar")
+          Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
       }
     )

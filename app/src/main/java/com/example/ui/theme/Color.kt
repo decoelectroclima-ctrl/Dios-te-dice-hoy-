@@ -31,10 +31,20 @@ val SacredOnSurfaceVariant = Color(0xFF504545)
 val SacredOutline = Color(0xFF837474)
 
 // Dark Theme Variants
-// High-contrast luminous rose/wine for text and accents on dark backgrounds (M3 compliance)
-val WinePrimaryDark = Color(0xFFFFB3B8)
-val WineOnPrimaryDark = Color(0xFF560014)
-val WinePrimaryContainerDark = Color(0xFF73001E)
+// Rich deep granate/burdeos for text and accents on dark backgrounds
+val WinePrimaryDark = Color(0xFF9A2535)
+val WineOnPrimaryDark = Color(0xFFFFFFFF)
+
+// Unified Granate / Burdeos Oscuro for all buttons across the entire app
+val GranateButton = Color(0xFF6E1420) // Authentic deep noble Granate / Burdeos Oscuro
+val GranateButtonDark = Color(0xFF8A1E2E) // Distinct deep granate for dark surfaces
+val GranateButtonBorderDark = Color(0xFFF0CA65) // Sacred gold border to appreciate button boundary on black surfaces
+
+// Backward-compatible aliases
+val WineButtonDark = GranateButtonDark
+val WineButtonBorderDark = GranateButtonBorderDark
+
+val WinePrimaryContainerDark = Color(0xFF8C1827)
 val WineOnPrimaryContainerDark = Color(0xFFFFD9DC)
 
 val GoldSecondaryDark = Color(0xFFF5CF68)

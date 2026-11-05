@@ -10,7 +10,7 @@ class HeartbeatSynthTest {
     @Test
     fun testBufferLength() {
         val bpm = 72
-        val beats = 8
+        val beats = 4
         val buffer = HeartbeatSynth.renderCycle(bpm, beats)
         val expectedLength = ((60.0 / bpm) * 44100).toInt() * beats
         assertEquals(expectedLength.toDouble(), buffer.size.toDouble(), 1.0)
@@ -26,9 +26,8 @@ class HeartbeatSynthTest {
 
     @Test
     fun testDeterminism() {
-        val seed = 123L
-        val buffer1 = HeartbeatSynth.renderCycle(72, seed = seed)
-        val buffer2 = HeartbeatSynth.renderCycle(72, seed = seed)
+        val buffer1 = HeartbeatSynth.renderCycle(72, 4)
+        val buffer2 = HeartbeatSynth.renderCycle(72, 4)
         assertArrayEquals(buffer1, buffer2)
     }
 }

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -72,6 +73,12 @@ import com.example.data.UserPreferences
 import com.example.model.ConfessionItem
 import com.example.ui.theme.GoldSecondary
 import com.example.ui.theme.WinePrimary
+import com.example.ui.theme.GranateButton
+import com.example.ui.theme.GranateButtonDark
+import com.example.ui.theme.GranateButtonBorderDark
+import com.example.ui.theme.appButtonColors
+import com.example.ui.theme.appButtonBorder
+import com.example.ui.theme.appWineColor
 import com.example.util.TextToSpeechHelper
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
@@ -103,6 +110,7 @@ fun ConfessionScreen(
   var showActoContricion by remember { mutableStateOf(false) }
 
   var newSinText by remember { mutableStateOf("") }
+  var penanceText by remember { mutableStateOf("") }
   var selectedCategory by remember { mutableStateOf("Pensamiento") }
   val categories = listOf("Pensamiento", "Palabra", "Obra", "Omisión")
 
@@ -173,7 +181,7 @@ el bien de las almas y mi propia santificación.
                   fontWeight = FontWeight.Bold,
                   fontFamily = FontFamily.Serif
                 ),
-                color = WinePrimary
+                color = appWineColor()
               )
               Text(
                 text = "Oración del Cardenal Verdier",
@@ -187,7 +195,7 @@ el bien de las almas y mi propia santificación.
               Icon(
                 imageVector = if (isPlayingPrayer) Icons.Default.Stop else Icons.Default.PlayArrow,
                 contentDescription = "Escuchar oración del Cardenal Verdier",
-                tint = if (isPlayingPrayer) WinePrimary else MaterialTheme.colorScheme.primary
+                tint = if (isPlayingPrayer) appWineColor() else MaterialTheme.colorScheme.primary
               )
             }
           }
@@ -215,7 +223,7 @@ el bien de las almas y mi propia santificación.
       }
     }
 
-    // BOTONES DE ACCIÓN: AÑADIR PECADO + GUÍA DE EXAMEN
+    // BOTONES DE ACCIÓN: AÑADIR PECADO + GUÍA DE EXAMEN (Granate con letra blanca)
     item {
       Row(
         modifier = Modifier
@@ -228,10 +236,8 @@ el bien de las almas y mi propia santificación.
           modifier = Modifier
             .weight(1f)
             .testTag("add_sin_button"),
-          colors = ButtonDefaults.buttonColors(
-            containerColor = WinePrimary,
-            contentColor = Color.White
-          ),
+          colors = appButtonColors(),
+          border = appButtonBorder(),
           shape = RoundedCornerShape(14.dp)
         ) {
           Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
@@ -239,14 +245,16 @@ el bien de las almas y mi propia santificación.
           Text("Anotar Falta", color = Color.White, fontWeight = FontWeight.Bold)
         }
 
-        OutlinedButton(
+        Button(
           onClick = { showExamGuide = !showExamGuide },
           modifier = Modifier.weight(1f),
+          colors = appButtonColors(),
+          border = appButtonBorder(),
           shape = RoundedCornerShape(14.dp)
         ) {
-          Icon(imageVector = Icons.Default.HelpOutline, contentDescription = null, modifier = Modifier.size(18.dp))
+          Icon(imageVector = Icons.Default.HelpOutline, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
           Spacer(modifier = Modifier.width(6.dp))
-          Text(if (showExamGuide) "Ocultar Guía" else "Guía Examen")
+          Text(if (showExamGuide) "Ocultar Guía" else "Guía Examen", color = Color.White, fontWeight = FontWeight.Bold)
         }
       }
     }
@@ -326,12 +334,13 @@ el bien de las almas y mi propia santificación.
                 snackbarHostState.showSnackbar("¡Tus faltas han sido borradas en la Sangre de Cristo! 🕊️")
               }
             },
-            colors = ButtonDefaults.buttonColors(containerColor = GoldSecondary),
+            colors = appButtonColors(),
+            border = appButtonBorder(),
             shape = RoundedCornerShape(12.dp)
           ) {
-            Icon(imageVector = Icons.Default.CleaningServices, contentDescription = null, modifier = Modifier.size(16.dp))
+            Icon(imageVector = Icons.Default.CleaningServices, contentDescription = null, modifier = Modifier.size(16.dp), tint = Color.White)
             Spacer(modifier = Modifier.width(4.dp))
-            Text("Limpiar Confesados")
+            Text("Limpiar Confesados", color = Color.White, fontWeight = FontWeight.Bold)
           }
         }
       }
@@ -363,7 +372,7 @@ el bien de las almas y mi propia santificación.
         }
       }
     } else {
-      items(confessionItems, key = { it.id }) { item ->
+      itemsIndexed(confessionItems, key = { index, item -> "conf_${index}_${item.id}" }) { _, item ->
         Card(
           modifier = Modifier
             .fillMaxWidth()
@@ -393,7 +402,7 @@ el bien de las almas y mi propia santificación.
 
             Spacer(modifier = Modifier.width(12.dp))
 
-            Column(modifier = Modifier.weight(1f)) {
+            Column(modifier = Modifier.weight(1f).padding(end = 8.dp)) {
               Text(
                 text = item.text,
                 style = MaterialTheme.typography.bodyMedium.copy(
@@ -420,13 +429,22 @@ el bien de las almas y mi propia santificación.
                   color = MaterialTheme.colorScheme.outline
                 )
               }
+              if (item.penance.isNotBlank()) {
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                  text = "Penitencia: ${item.penance}",
+                  style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                  color = appWineColor()
+                )
+              }
             }
 
             IconButton(
               onClick = {
                 prefs.removeConfessionItem(item.id)
                 confessionItems = prefs.getConfessionItems()
-              }
+              },
+              modifier = Modifier.size(40.dp)
             ) {
               Icon(
                 imageVector = Icons.Default.Delete,
@@ -461,14 +479,14 @@ el bien de las almas y mi propia santificación.
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
               ),
-              color = WinePrimary
+              color = appWineColor()
             )
             IconButton(
               onClick = {
                 ttsHelper.speak("""Señor mío Jesucristo, Dios y Hombre verdadero, Creador, Padre y Redentor mío; por ser Vos quien sois, Bondad infinita, y porque os amo sobre todas las cosas, me pesa de todo corazón haberos ofendido. Me propongo firmemente nunca más pecar, confesarme y cumplir la penitencia que me fuere impuesta. Amén.""")
               }
             ) {
-              Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Escuchar", tint = WinePrimary)
+              Icon(imageVector = Icons.Default.PlayArrow, contentDescription = "Escuchar", tint = appWineColor())
             }
           }
           Text(
@@ -518,6 +536,18 @@ el bien de las almas y mi propia santificación.
             shape = RoundedCornerShape(12.dp)
           )
 
+          Spacer(modifier = Modifier.height(10.dp))
+
+          OutlinedTextField(
+            value = penanceText,
+            onValueChange = { penanceText = it },
+            placeholder = { Text("Ej. 1 Padre Nuestro, 1 Ave María...") },
+            label = { Text("Penitencia (opcional)") },
+            modifier = Modifier.fillMaxWidth(),
+            maxLines = 2,
+            shape = RoundedCornerShape(12.dp)
+          )
+
           Spacer(modifier = Modifier.height(12.dp))
 
           Text(
@@ -549,21 +579,22 @@ el bien de las almas y mi propia santificación.
                 text = newSinText.trim(),
                 category = selectedCategory,
                 isConfessed = false,
-                dateAdded = dateNow
+                dateAdded = dateNow,
+                penance = penanceText.trim()
               )
               prefs.addConfessionItem(item)
               confessionItems = prefs.getConfessionItems()
               newSinText = ""
+              penanceText = ""
               showAddDialog = false
               scope.launch {
                 snackbarHostState.showSnackbar("Anotado en tu diario de confesión")
               }
             }
           },
-          colors = ButtonDefaults.buttonColors(
-            containerColor = WinePrimary,
-            contentColor = Color.White
-          )
+          colors = appButtonColors(),
+          border = appButtonBorder(),
+          shape = RoundedCornerShape(10.dp)
         ) {
           Text("Guardar", color = Color.White, fontWeight = FontWeight.Bold)
         }
@@ -575,7 +606,7 @@ el bien de las almas y mi propia santificación.
             newSinText = ""
           }
         ) {
-          Text("Cancelar")
+          Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
       }
     )

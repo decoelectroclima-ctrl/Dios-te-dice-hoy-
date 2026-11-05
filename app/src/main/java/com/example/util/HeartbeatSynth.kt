@@ -1,66 +1,106 @@
 package com.example.util
 
 import kotlin.math.*
-import java.util.Random
-
-data class HeartbeatConfig(
-    val sampleRate: Int = 44100,
-    val lubFreqStart: Double = 70.0,
-    val lubFreqEnd: Double = 45.0,
-    val lubDuration: Double = 0.08,
-    val dubFreqStart: Double = 90.0,
-    val dubFreqEnd: Double = 60.0,
-    val dubDuration: Double = 0.06,
-    val noiseDuration: Double = 0.025,
-    val drive: Double = 2.5
-)
 
 object HeartbeatSynth {
-    private val config = HeartbeatConfig()
+    const val SAMPLE_RATE = 44100
 
-    fun renderCycle(bpm: Int, beats: Int = 2, sampleRate: Int = 44100, seed: Long = 1L): ShortArray {
-        return try {
-            val random = Random(seed)
-            val safeBpm = bpm.coerceIn(40, 180)
-            val secPerCycle = 60.0 / safeBpm
-            val sistole = (0.30 - (safeBpm - 60) * 0.0011).coerceIn(0.18, 0.32)
-            val numSamplesPerCycle = (secPerCycle * sampleRate).toInt()
-            val totalSamples = (numSamplesPerCycle * beats).coerceIn(100, 441000)
-            val buffer = FloatArray(totalSamples)
+    val lubSamples: ShortArray by lazy { renderSingleBeat(isLub = true) }
+    val dubSamples: ShortArray by lazy { renderSingleBeat(isLub = false) }
 
-            for (b in 0 until beats) {
-                val offset = b * numSamplesPerCycle
-                val variation = 1.0 + (random.nextDouble() * 0.04 - 0.02)
-                
-                // "Lub"
-                addTone(buffer, offset, config.lubFreqStart * variation, config.lubFreqEnd * variation, (config.lubDuration * sampleRate).toInt(), 1.0)
-                // "Dub"
-                addTone(buffer, offset + (sistole * sampleRate).toInt(), config.dubFreqStart * variation, config.dubFreqEnd * variation, (config.dubDuration * sampleRate).toInt(), 0.65)
-            }
+    /**
+     * Synthesizes a realistic, visceral heartbeat sound with enhanced acoustic presence
+     * specifically engineered to be clearly heard on mobile phone and emulator speakers.
+     */
+    private fun renderSingleBeat(isLub: Boolean): ShortArray {
+        val durationSec = if (isLub) 0.125 else 0.095
+        val durationSamples = (durationSec * SAMPLE_RATE).toInt()
+        val buffer = FloatArray(durationSamples)
 
-            var maxVal = 0.0001f
-            for (i in buffer.indices) maxVal = max(maxVal, abs(buffer[i]))
-            val shortResult = ShortArray(totalSamples)
-            val driveVal = config.drive
-            val tanhDrive = tanh(driveVal)
-            for (i in buffer.indices) {
-                val normalized = tanh(driveVal * (buffer[i] / maxVal * 0.85)) / tanhDrive
-                shortResult[i] = (normalized * 32767).toInt().coerceIn(-32768, 32767).toShort()
-            }
-            shortResult
-        } catch (_: Throwable) {
-            ShortArray(100)
+        val freqStart = if (isLub) 135.0 else 165.0
+        val freqEnd = if (isLub) 80.0 else 105.0
+        val transientFreq = if (isLub) 480.0 else 620.0
+
+        var phaseFund = 0.0
+        var phaseHarm2 = 0.0
+        var phaseHarm3 = 0.0
+        var phaseTransient = 0.0
+
+        for (i in 0 until durationSamples) {
+            val t = i.toDouble() / durationSamples
+            // Natural percussion envelope with punchy attack and smooth damping
+            val envelope = sin(PI * t.pow(0.55)) * exp(-t * 3.8)
+
+            // Frequency sweep from start to end
+            val fFund = freqStart + (freqEnd - freqStart) * t
+            val fHarm2 = fFund * 2.0
+            val fHarm3 = fFund * 3.0
+
+            // Impact transient click in the first 25ms for speaker audibility
+            val transientEnv = if (t < 0.25) (1.0 - t / 0.25).pow(2.0) else 0.0
+
+            val sample = (
+                sin(phaseFund) * 0.45 +
+                sin(phaseHarm2) * 0.35 +
+                sin(phaseHarm3) * 0.12 +
+                sin(phaseTransient) * 0.15 * transientEnv
+            ) * envelope
+
+            buffer[i] = sample.toFloat()
+
+            phaseFund += 2.0 * PI * fFund / SAMPLE_RATE
+            phaseHarm2 += 2.0 * PI * fHarm2 / SAMPLE_RATE
+            phaseHarm3 += 2.0 * PI * fHarm3 / SAMPLE_RATE
+            phaseTransient += 2.0 * PI * transientFreq / SAMPLE_RATE
         }
+
+        // Normalize to peak amplitude of ~31500 (safe 16-bit PCM ceiling)
+        var maxVal = 0.0001f
+        for (v in buffer) {
+            val a = abs(v)
+            if (a > maxVal) maxVal = a
+        }
+
+        val result = ShortArray(durationSamples)
+        val targetPeak = if (isLub) 31500f else 27000f
+        for (i in buffer.indices) {
+            val normalized = (buffer[i] / maxVal) * targetPeak
+            result[i] = normalized.toInt().coerceIn(-32768, 32767).toShort()
+        }
+        return result
     }
 
-    private fun addTone(buffer: FloatArray, start: Int, freqStart: Double, freqEnd: Double, duration: Int, amp: Double) {
-        var phase = 0.0
-        for (i in 0 until duration) {
-            if (start + i >= buffer.size) break
-            val t = i.toDouble() / duration
-            val freq = freqStart + (freqEnd - freqStart) * t
-            buffer[start + i] += (sin(phase) * amp).toFloat()
-            phase += 2.0 * PI * freq / 44100.0
+    /**
+     * Renders a multi-beat continuous cycle if needed for static playback
+     */
+    fun renderCycle(bpm: Int, beats: Int = 4, sampleRate: Int = SAMPLE_RATE): ShortArray {
+        val safeBpm = bpm.coerceIn(40, 180)
+        val secPerCycle = 60.0 / safeBpm
+        val sistoleSec = 0.14 // Interval between Lub and Dub
+        val numSamplesPerCycle = (secPerCycle * sampleRate).toInt()
+        val totalSamples = numSamplesPerCycle * beats
+        val cycle = ShortArray(totalSamples)
+
+        val lub = lubSamples
+        val dub = dubSamples
+        val sistoleSamples = (sistoleSec * sampleRate).toInt()
+
+        for (b in 0 until beats) {
+            val offset = b * numSamplesPerCycle
+            // Write LUB
+            for (i in lub.indices) {
+                if (offset + i < totalSamples) {
+                    cycle[offset + i] = lub[i]
+                }
+            }
+            // Write DUB
+            val dubOffset = offset + sistoleSamples
+            for (i in dub.indices) {
+                if (dubOffset + i < totalSamples) {
+                    cycle[dubOffset + i] = dub[i]
+                }
+            }
         }
+        return cycle
     }
 }

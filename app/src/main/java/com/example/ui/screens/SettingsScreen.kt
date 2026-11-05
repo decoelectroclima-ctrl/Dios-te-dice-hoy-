@@ -1,11 +1,11 @@
 package com.example.ui.screens
 
 import android.Manifest
+import android.app.Activity
 import android.app.TimePickerDialog
 import android.content.pm.PackageManager
 import android.os.Build
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
+import com.example.util.PermissionBridge
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -29,11 +29,10 @@ import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Fingerprint
 import androidx.compose.material.icons.filled.Lock
-import androidx.compose.material.icons.filled.MenuBook
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Security
+import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.Widgets
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -49,9 +48,6 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
-import androidx.compose.material3.TextButton
-import com.example.util.BiometricHelper
-import com.example.widget.DailyVerseWidgetProvider
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -65,18 +61,24 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.example.data.BibleRepository
-import com.example.data.BibleVerseEntity
 import com.example.data.UserPreferences
 import com.example.notification.NotificationHelper
 import com.example.ui.theme.GoldSecondary
 import com.example.ui.theme.WinePrimary
+import com.example.ui.theme.GranateButton
+import com.example.ui.theme.GranateButtonDark
+import com.example.ui.theme.GranateButtonBorderDark
+import com.example.ui.theme.appButtonColors
+import com.example.ui.theme.appButtonBorder
+import com.example.ui.theme.appWineColor
+import com.example.util.BiometricHelper
+import com.example.widget.DiosTeDiceWidgetProvider
+
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -112,31 +114,6 @@ fun SettingsScreen(
   var isBiometricEnabled by remember { mutableStateOf(prefs.isBiometricEnabled()) }
   val isBiometricDeviceAvailable = remember { BiometricHelper.isBiometricAvailable(context) }
   val hasPin = remember(isLockEnabled) { prefs.hasPinSet() }
-
-  // Notification permission
-  var hasPermission by remember {
-    mutableStateOf(
-      if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-        ContextCompat.checkSelfPermission(
-          context,
-          Manifest.permission.POST_NOTIFICATIONS
-        ) == PackageManager.PERMISSION_GRANTED
-      } else {
-        true
-      }
-    )
-  }
-
-  val permissionLauncher = rememberLauncherForActivityResult(
-    contract = ActivityResultContracts.RequestPermission()
-  ) { granted ->
-    hasPermission = granted
-    if (granted) {
-      scope.launch {
-        snackbarHostState.showSnackbar("¡Permiso de notificaciones concedido con éxito!")
-      }
-    }
-  }
 
   fun showMorningTimePicker() {
     val picker = TimePickerDialog(
@@ -239,7 +216,7 @@ fun SettingsScreen(
               },
               label = { Text("☀️ Modo Claro") },
               colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = WinePrimary,
+                selectedContainerColor = appWineColor(),
                 selectedLabelColor = Color.White
               )
             )
@@ -253,7 +230,7 @@ fun SettingsScreen(
               },
               label = { Text("🌙 Modo Oscuro") },
               colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = WinePrimary,
+                selectedContainerColor = appWineColor(),
                 selectedLabelColor = Color.White
               )
             )
@@ -267,7 +244,7 @@ fun SettingsScreen(
               },
               label = { Text("📱 Sistema") },
               colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = WinePrimary,
+                selectedContainerColor = appWineColor(),
                 selectedLabelColor = Color.White
               )
             )
@@ -302,195 +279,7 @@ fun SettingsScreen(
       }
     }
 
-    // BIBLE VERSION SELECTION
-    item {
-      Card(
-        modifier = Modifier
-          .fillMaxWidth()
-          .widthIn(max = 600.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-      ) {
-        Column(modifier = Modifier.padding(18.dp)) {
-          Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-              imageVector = Icons.Default.MenuBook,
-              contentDescription = null,
-              tint = MaterialTheme.colorScheme.primary,
-              modifier = Modifier.size(22.dp)
-            )
-            Spacer(modifier = Modifier.width(10.dp))
-            Text(
-              text = "Versión de la Biblia",
-              style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                fontFamily = FontFamily.Serif
-              ),
-              color = MaterialTheme.colorScheme.onSurface
-            )
-          }
 
-          Spacer(modifier = Modifier.height(8.dp))
-          Text(
-            text = "Selecciona la versión para las lecturas. Puedes descargar versiones adicionales para acceso offline:",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-          )
-
-          Spacer(modifier = Modifier.height(14.dp))
-
-          val versions = listOf("DHHED", "BLP", "Reina Valera")
-          var selectedVersion by remember { mutableStateOf(prefs.getBibleVersion()) }
-          var installedVersions by remember { mutableStateOf(prefs.getInstalledVersions()) }
-          val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-
-          Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-            versions.forEach { version ->
-              val isInstalled = installedVersions.contains(version)
-              Row(
-                modifier = Modifier
-                  .fillMaxWidth()
-                  .clip(RoundedCornerShape(10.dp))
-                  .background(if (selectedVersion == version) MaterialTheme.colorScheme.surfaceVariant else Color.Transparent)
-                  .clickable {
-                    haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                    if (isInstalled) {
-                       selectedVersion = version
-                       prefs.setBibleVersion(version)
-                    } else {
-                       scope.launch { snackbarHostState.showSnackbar("Debes descargar la versión primero.") }
-                    }
-                  }
-                  .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
-              ) {
-                Text(version, fontWeight = if (selectedVersion == version) FontWeight.Bold else FontWeight.Normal)
-                if (isInstalled) {
-                   if (selectedVersion == version) {
-                      Icon(imageVector = Icons.Default.Check, contentDescription = null, tint = WinePrimary)
-                   } else {
-                      Text("Instalada", color = MaterialTheme.colorScheme.primary, fontSize = 12.sp)
-                   }
-                } else {
-                  TextButton(onClick = { 
-                     haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                     scope.launch {
-                        snackbarHostState.showSnackbar("Descargando e instalando $version...")
-                        val fullVerses = com.example.data.BibleData.getAllVersesAsEntities(version)
-                        BibleRepository(context).downloadVerses(version, fullVerses)
-                        prefs.addInstalledVersion(version)
-                        installedVersions = prefs.getInstalledVersions()
-                        snackbarHostState.showSnackbar("$version descargada e instalada exitosamente.")
-                     }
-                  }) {
-                      Text("Descargar")
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    // ALARMA Y NOTIFICACIÓN MATUTINA ("DIOS TE DICE HOY")
-    item {
-      Card(
-        modifier = Modifier
-          .fillMaxWidth()
-          .widthIn(max = 600.dp),
-        shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
-      ) {
-        Column(modifier = Modifier.padding(18.dp)) {
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-          ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-              Icon(imageVector = Icons.Default.Notifications, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
-              Spacer(modifier = Modifier.width(10.dp))
-              Column {
-                Text(
-                  text = "Mensaje Matutino «Dios te dice hoy»",
-                  style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                  color = MaterialTheme.colorScheme.onSurface
-                )
-                Text(
-                  text = if (morningNotifEnabled) "Programada a las $formattedMorningTime hrs" else "Desactivada",
-                  style = MaterialTheme.typography.bodySmall,
-                  color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-              }
-            }
-
-            Switch(
-              checked = morningNotifEnabled,
-              onCheckedChange = { checked ->
-                morningNotifEnabled = checked
-                prefs.setNotificationEnabled(checked)
-                if (checked) {
-                  NotificationHelper.scheduleDailyAlarm(context)
-                  scope.launch {
-                    snackbarHostState.showSnackbar("Mensaje matutino fijado para las $formattedMorningTime hrs")
-                  }
-                } else {
-                  NotificationHelper.cancelDailyAlarm(context)
-                  scope.launch {
-                    snackbarHostState.showSnackbar("Notificación matutina desactivada")
-                  }
-                }
-              },
-              colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = WinePrimary)
-            )
-          }
-
-          Spacer(modifier = Modifier.height(12.dp))
-
-          Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-          ) {
-            Surface(
-              shape = RoundedCornerShape(10.dp),
-              color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-              modifier = Modifier
-                .weight(1f)
-                .clickable { showMorningTimePicker() }
-            ) {
-              Row(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalAlignment = Alignment.CenterVertically
-              ) {
-                Icon(imageVector = Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(18.dp), tint = MaterialTheme.colorScheme.primary)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text("Hora: $formattedMorningTime hrs", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
-              }
-            }
-
-            Button(
-              onClick = {
-                NotificationHelper.sendTestNotification(context)
-                scope.launch {
-                  snackbarHostState.showSnackbar("🔔 ¡Notificación «Dios te dice hoy» enviada al sistema!")
-                }
-              },
-              colors = ButtonDefaults.buttonColors(
-                containerColor = WinePrimary,
-                contentColor = Color.White
-              ),
-              shape = RoundedCornerShape(10.dp)
-            ) {
-              Text("Probar ahora", color = Color.White, fontWeight = FontWeight.Bold)
-            }
-          }
-        }
-      }
-    }
 
     // ALARMA Y RECORDATORIO NOCTURNO ("LA MANO DE DIOS")
     item {
@@ -542,7 +331,7 @@ fun SettingsScreen(
                   }
                 }
               },
-              colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = WinePrimary)
+              colors = SwitchDefaults.colors(checkedThumbColor = Color.White, checkedTrackColor = appWineColor())
             )
           }
 
@@ -576,10 +365,8 @@ fun SettingsScreen(
                   snackbarHostState.showSnackbar("🔔 ¡Notificación nocturna de prueba enviada al sistema!")
                 }
               },
-              colors = ButtonDefaults.buttonColors(
-                containerColor = WinePrimary,
-                contentColor = Color.White
-              ),
+              colors = appButtonColors(),
+              border = appButtonBorder(),
               shape = RoundedCornerShape(10.dp)
             ) {
               Text("Probar ahora", color = Color.White, fontWeight = FontWeight.Bold)
@@ -609,7 +396,7 @@ fun SettingsScreen(
               Icon(
                 imageVector = Icons.Default.Lock,
                 contentDescription = null,
-                tint = WinePrimary,
+                tint = appWineColor(),
                 modifier = Modifier.size(24.dp)
               )
               Spacer(modifier = Modifier.width(10.dp))
@@ -653,7 +440,7 @@ fun SettingsScreen(
               },
               colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = WinePrimary
+                checkedTrackColor = appWineColor()
               )
             )
           }
@@ -666,10 +453,8 @@ fun SettingsScreen(
           ) {
             Button(
               onClick = { onOpenPinSetup() },
-              colors = ButtonDefaults.buttonColors(
-                containerColor = WinePrimary,
-                contentColor = Color.White
-              ),
+              colors = appButtonColors(),
+              border = appButtonBorder(),
               shape = RoundedCornerShape(10.dp),
               modifier = Modifier.weight(1f)
             ) {
@@ -682,7 +467,7 @@ fun SettingsScreen(
             }
 
             if (hasPin) {
-              OutlinedButton(
+              Button(
                 onClick = {
                   prefs.removePin()
                   isLockEnabled = false
@@ -690,9 +475,11 @@ fun SettingsScreen(
                     snackbarHostState.showSnackbar("PIN eliminado. Acceso sin clave.")
                   }
                 },
+                colors = appButtonColors(),
+                border = appButtonBorder(),
                 shape = RoundedCornerShape(10.dp)
               ) {
-                Text("Eliminar", fontSize = 12.sp)
+                Text("Eliminar", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
               }
             }
           }
@@ -743,7 +530,7 @@ fun SettingsScreen(
                 },
                 colors = SwitchDefaults.colors(
                   checkedThumbColor = Color.White,
-                  checkedTrackColor = WinePrimary
+                  checkedTrackColor = appWineColor()
                 )
               )
             }
@@ -752,7 +539,9 @@ fun SettingsScreen(
       }
     }
 
-    // WIDGET DE ESCRITORIO (PANTALLA DE INICIO)
+
+
+    // WIDGET DE LA PANTALLA DE INICIO (ESCRITORIO)
     item {
       Card(
         modifier = Modifier
@@ -767,18 +556,21 @@ fun SettingsScreen(
             Icon(
               imageVector = Icons.Default.Widgets,
               contentDescription = null,
-              tint = WinePrimary,
+              tint = appWineColor(),
               modifier = Modifier.size(24.dp)
             )
             Spacer(modifier = Modifier.width(10.dp))
             Column {
               Text(
-                text = "Widget de Pantalla de Inicio",
-                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                text = "Widget en tu Pantalla de Inicio",
+                style = MaterialTheme.typography.titleMedium.copy(
+                  fontWeight = FontWeight.Bold,
+                  fontFamily = FontFamily.Serif
+                ),
                 color = MaterialTheme.colorScheme.onSurface
               )
               Text(
-                text = "«Dios Te Dice Hoy» en tu escritorio Android",
+                text = "Lleva la Palabra de Dios viva a tu escritorio",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
               )
@@ -786,30 +578,38 @@ fun SettingsScreen(
           }
 
           Spacer(modifier = Modifier.height(10.dp))
-
           Text(
-            text = "Mantén pulsada la pantalla de inicio de tu teléfono, entra en 'Widgets', busca 'Dios Te Dice Hoy' y colócalo en tu pantalla. El widget se actualiza diariamente sin necesidad de abrir la aplicación.",
-            style = MaterialTheme.typography.bodySmall,
+            text = "Puedes colocar el widget compacto (4x1) en tu pantalla de inicio de Android para leer la cita bíblica e inspiración diaria ocupando solo una fila en tu escritorio.\n\nPara añadirlo: mantén pulsado un espacio vacío de tu pantalla de inicio -> selecciona «Widgets» -> busca «Dios Te Dice Hoy» (4x1) y colócalo.",
+            style = MaterialTheme.typography.bodySmall.copy(lineHeight = 18.sp),
             color = MaterialTheme.colorScheme.onSurfaceVariant
           )
 
-          Spacer(modifier = Modifier.height(12.dp))
+          Spacer(modifier = Modifier.height(14.dp))
 
           Button(
             onClick = {
-              DailyVerseWidgetProvider.updateAllWidgets(context)
+              val updatedVerse = DiosTeDiceWidgetProvider.updateAllWidgets(context, newRandomVerse = true)
               scope.launch {
-                snackbarHostState.showSnackbar("✨ Todos los widgets actualizados con el versículo de hoy")
+                snackbarHostState.showSnackbar("🕊️ ¡Widget sincronizado con éxito! (${updatedVerse.citation})")
               }
             },
-            colors = ButtonDefaults.buttonColors(
-              containerColor = WinePrimary,
-              contentColor = Color.White
-            ),
-            shape = RoundedCornerShape(10.dp),
+            colors = appButtonColors(),
+            border = appButtonBorder(),
+            shape = RoundedCornerShape(12.dp),
             modifier = Modifier.fillMaxWidth()
           ) {
-            Text("Sincronizar Widget Ahora", color = Color.White, fontWeight = FontWeight.Bold)
+            Icon(
+              imageVector = Icons.Default.Sync,
+              contentDescription = null,
+              tint = Color.White,
+              modifier = Modifier.size(18.dp)
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Text(
+              text = "Sincronizar Widget Ahora",
+              color = Color.White,
+              fontWeight = FontWeight.Bold
+            )
           }
         }
       }
@@ -852,6 +652,21 @@ fun SettingsScreen(
           )
         }
 
+      }
+    }
+
+    item {
+      Column(
+        modifier = Modifier
+          .fillMaxWidth()
+          .padding(vertical = 16.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+      ) {
+        Text(
+          text = "Dios Te Dice Hoy • Versión 43.0",
+          style = MaterialTheme.typography.labelSmall,
+          color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f)
+        )
       }
     }
   }

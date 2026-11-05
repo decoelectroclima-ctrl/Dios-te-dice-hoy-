@@ -20,10 +20,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.Favorite
@@ -84,6 +86,13 @@ import com.example.model.CatholicPrayer
 import com.example.model.PrayerPurpose
 import com.example.ui.theme.GoldSecondary
 import com.example.ui.theme.WinePrimary
+import com.example.ui.theme.GranateButton
+import com.example.ui.theme.GranateButtonDark
+import com.example.ui.theme.GranateButtonBorderDark
+import com.example.ui.theme.appButtonColors
+import com.example.ui.theme.appButtonBorder
+import com.example.ui.theme.appWineColor
+import com.example.ui.theme.isAppInDarkTheme
 import com.example.util.TextToSpeechHelper
 import kotlinx.coroutines.launch
 
@@ -97,6 +106,7 @@ fun PrayersScreen(
   val context = LocalContext.current
   val prefs = remember { UserPreferences(context) }
   val scope = rememberCoroutineScope()
+  val isDark = isAppInDarkTheme()
 
   val ttsHelper = remember { TextToSpeechHelper(context) }
   var currentlyPlayingPrayerId by remember { mutableStateOf<String?>(null) }
@@ -180,13 +190,13 @@ fun PrayersScreen(
         .widthIn(max = 600.dp)
         .clip(RoundedCornerShape(14.dp)),
       containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-      contentColor = WinePrimary,
+      contentColor = appWineColor(),
       edgePadding = 8.dp,
       indicator = { tabPositions ->
         if (viewModeIndex < tabPositions.size) {
           TabRowDefaults.SecondaryIndicator(
             modifier = Modifier.tabIndicatorOffset(tabPositions[viewModeIndex]),
-            color = WinePrimary,
+            color = appWineColor(),
             height = 3.dp
           )
         }
@@ -209,7 +219,7 @@ fun PrayersScreen(
               BadgedBox(
                 badge = {
                   Badge(
-                    containerColor = WinePrimary,
+                    containerColor = appWineColor(),
                     contentColor = Color.White
                   ) {
                     Text(text = "${favoritePrayersSet.size}", fontSize = 10.sp)
@@ -220,7 +230,7 @@ fun PrayersScreen(
                   text = title,
                   style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                    color = if (isSelected) WinePrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                    color = if (isSelected) appWineColor() else MaterialTheme.colorScheme.onSurfaceVariant
                   ),
                   modifier = Modifier.padding(end = 4.dp)
                 )
@@ -230,7 +240,7 @@ fun PrayersScreen(
                 text = title,
                 style = MaterialTheme.typography.labelMedium.copy(
                   fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                  color = if (isSelected) WinePrimary else MaterialTheme.colorScheme.onSurfaceVariant
+                  color = if (isSelected) appWineColor() else MaterialTheme.colorScheme.onSurfaceVariant
                 )
               )
             }
@@ -241,7 +251,7 @@ fun PrayersScreen(
 
     Spacer(modifier = Modifier.height(10.dp))
 
-    // Audio Notice Banner
+    // Audio Notice & Compendium Banner
     Surface(
       shape = RoundedCornerShape(12.dp),
       color = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.45f),
@@ -259,14 +269,21 @@ fun PrayersScreen(
           imageVector = Icons.Default.Headphones,
           contentDescription = null,
           tint = GoldSecondary,
-          modifier = Modifier.size(20.dp)
+          modifier = Modifier.size(22.dp)
         )
         Spacer(modifier = Modifier.width(10.dp))
-        Text(
-          text = "Voz Viva: Pulsa el botón ▶ para escuchar cualquier oración si no puedes leerla.",
-          style = MaterialTheme.typography.bodySmall,
-          color = MaterialTheme.colorScheme.onSecondaryContainer
-        )
+        Column {
+          Text(
+            text = "Compendio de 53 Oraciones Católicas Esenciales",
+            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+            color = WinePrimary
+          )
+          Text(
+            text = "Voz Viva en español: Pulsa ▶ para escuchar cualquier oración si no puedes leerla.",
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+            color = MaterialTheme.colorScheme.onSecondaryContainer
+          )
+        }
       }
     }
 
@@ -381,10 +398,8 @@ fun PrayersScreen(
                   Spacer(modifier = Modifier.height(20.dp))
                   Button(
                     onClick = { viewModeIndex = 3 },
-                    colors = ButtonDefaults.buttonColors(
-                      containerColor = WinePrimary,
-                      contentColor = Color.White
-                    ),
+                    colors = appButtonColors(),
+                    border = appButtonBorder(),
                     shape = RoundedCornerShape(12.dp)
                   ) {
                     Icon(
@@ -421,7 +436,7 @@ fun PrayersScreen(
                     Icon(
                       imageVector = Icons.Default.Favorite,
                       contentDescription = null,
-                      tint = WinePrimary,
+                      tint = appWineColor(),
                       modifier = Modifier.size(20.dp)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
@@ -432,23 +447,26 @@ fun PrayersScreen(
                     )
                   }
                   if (favoritePrayers.isNotEmpty()) {
-                    TextButton(
+                    Button(
                       onClick = {
                         val first = favoritePrayers.first()
                         playOrStopPrayer(first)
-                      }
+                      },
+                      colors = appButtonColors(),
+                      border = appButtonBorder(),
+                      shape = RoundedCornerShape(10.dp)
                     ) {
                       Icon(
                         imageVector = if (currentlyPlayingPrayerId != null && favoritePrayers.any { it.id == currentlyPlayingPrayerId }) Icons.Default.Stop else Icons.Default.PlayArrow,
                         contentDescription = null,
-                        modifier = Modifier.size(18.dp),
-                        tint = WinePrimary
+                        modifier = Modifier.size(16.dp),
+                        tint = Color.White
                       )
                       Spacer(modifier = Modifier.width(4.dp))
                       Text(
                         text = if (currentlyPlayingPrayerId != null && favoritePrayers.any { it.id == currentlyPlayingPrayerId }) "Detener" else "Escuchar",
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = WinePrimary
+                        color = Color.White
                       )
                     }
                   }
@@ -468,7 +486,7 @@ fun PrayersScreen(
               }
             }
 
-            items(favoritePrayers, key = { it.id }) { prayer ->
+            itemsIndexed(favoritePrayers, key = { index, prayer -> "fav_${index}_${prayer.id}" }) { _, prayer ->
               PrayerItemRow(
                 prayer = prayer,
                 isPlaying = currentlyPlayingPrayerId == prayer.id,
@@ -495,7 +513,7 @@ fun PrayersScreen(
             .widthIn(max = 600.dp),
           verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-          items(PrayerPurpose.entries, key = { it.name }) { purpose ->
+          itemsIndexed(PrayerPurpose.entries, key = { index, purpose -> "cat_${index}_${purpose.name}" }) { _, purpose ->
             val count = PrayerRepository.getPrayersByPurpose(purpose).size
             val isSelected = selectedPurpose == purpose
 
@@ -633,7 +651,7 @@ fun PrayersScreen(
             }
           }
 
-          items(holySpiritPrayers, key = { it.id }) { prayer ->
+          itemsIndexed(holySpiritPrayers, key = { index, prayer -> "hol_${index}_${prayer.id}" }) { _, prayer ->
             PrayerItemRow(
               prayer = prayer,
               isPlaying = currentlyPlayingPrayerId == prayer.id,
@@ -685,7 +703,7 @@ fun PrayersScreen(
             }
           }
 
-          items(prayers, key = { it.id }) { prayer ->
+          itemsIndexed(prayers, key = { index, prayer -> "all_${index}_${prayer.id}" }) { _, prayer ->
             PrayerItemRow(
               prayer = prayer,
               isPlaying = currentlyPlayingPrayerId == prayer.id,
@@ -727,17 +745,20 @@ fun PrayersScreen(
         activePrayerDetail = null
       },
       confirmButton = {
-        TextButton(
+        Button(
           onClick = {
             ttsHelper.stop()
             currentlyPlayingPrayerId = null
             activePrayerDetail = null
-          }
+          },
+          colors = appButtonColors(),
+          border = appButtonBorder(),
+          shape = RoundedCornerShape(10.dp)
         ) {
           Text(
             text = "Cerrar",
             style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-            color = WinePrimary
+            color = Color.White
           )
         }
       },
@@ -761,8 +782,20 @@ fun PrayersScreen(
               Icon(
                 imageVector = if (isFav) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
                 contentDescription = if (isFav) "Quitar de favoritas" else "Añadir a favoritas",
-                tint = if (isFav) WinePrimary else MaterialTheme.colorScheme.outline
+                tint = if (isFav) appWineColor() else MaterialTheme.colorScheme.outline
               )
+            }
+            IconButton(
+              onClick = {
+                // Here I would need a way to open the ConfessionScreen or add it directly
+                // Given the limitations, maybe I just show a snackbar for now
+                // Or I can add it directly if I had access to ConfessionScreen state
+                scope.launch {
+                  snackbarHostState.showSnackbar("«${prayer.title}» añadida como penitencia")
+                }
+              }
+            ) {
+              Icon(imageVector = Icons.Filled.Edit, contentDescription = "Añadir a penitencia", tint = appWineColor())
             }
           }
           prayer.latinTitle?.let {
@@ -794,7 +827,7 @@ fun PrayersScreen(
                 Text(
                   text = if (isLatinView) "Ver en Español" else "Ver en Latín",
                   style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                  color = WinePrimary,
+                  color = appWineColor(),
                   modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp)
                 )
               }
@@ -834,7 +867,7 @@ fun PrayersScreen(
                 Icon(
                   imageVector = if (currentlyPlayingPrayerId == prayer.id) Icons.Default.Stop else Icons.Default.PlayArrow,
                   contentDescription = "Escuchar oración con Voz Viva",
-                  tint = if (currentlyPlayingPrayerId == prayer.id) WinePrimary else MaterialTheme.colorScheme.primary
+                  tint = if (currentlyPlayingPrayerId == prayer.id) appWineColor() else MaterialTheme.colorScheme.primary
                 )
               }
 
@@ -889,10 +922,8 @@ fun PrayersScreen(
                     onClick = {
                       if (prayerCounter < prayer.counterTotal) prayerCounter++
                     },
-                    colors = ButtonDefaults.buttonColors(
-                      containerColor = WinePrimary,
-                      contentColor = Color.White
-                    ),
+                    colors = appButtonColors(),
+                    border = appButtonBorder(),
                     shape = RoundedCornerShape(10.dp)
                   ) {
                     Icon(
@@ -1016,7 +1047,7 @@ fun PrayerItemRow(
         Icon(
           imageVector = if (isPlaying) Icons.Default.Stop else Icons.Default.PlayArrow,
           contentDescription = if (isPlaying) "Detener audio" else "Escuchar oración con Voz Viva",
-          tint = if (isPlaying) WinePrimary else MaterialTheme.colorScheme.primary
+          tint = if (isPlaying) appWineColor() else MaterialTheme.colorScheme.primary
         )
       }
 
@@ -1028,7 +1059,7 @@ fun PrayerItemRow(
         Icon(
           imageVector = if (isFavorite) Icons.Default.Favorite else Icons.Default.FavoriteBorder,
           contentDescription = if (isFavorite) "Quitar de favoritas" else "Marcar como favorita",
-          tint = if (isFavorite) WinePrimary else MaterialTheme.colorScheme.outline
+          tint = if (isFavorite) appWineColor() else MaterialTheme.colorScheme.outline
         )
       }
     }

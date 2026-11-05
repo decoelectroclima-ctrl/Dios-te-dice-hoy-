@@ -5,7 +5,8 @@ data class ConfessionItem(
   val text: String,
   val category: String = "Falta", // e.g. "Pensamiento", "Palabra", "Obra", "Omisión"
   val isConfessed: Boolean = false,
-  val dateAdded: String
+  val dateAdded: String,
+  val penance: String = ""
 )
 
 data class HandOfGodEntry(

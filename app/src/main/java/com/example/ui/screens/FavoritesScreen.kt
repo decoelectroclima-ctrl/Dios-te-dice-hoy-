@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -67,15 +68,20 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.data.PrayerRepository
-import androidx.compose.material.icons.filled.PlayArrow
-import androidx.compose.material.icons.filled.Stop
 import androidx.compose.runtime.DisposableEffect
 import com.example.util.TextToSpeechHelper
 import com.example.data.UserPreferences
-import com.example.data.VerseRepository
 import com.example.notification.NotificationHelper
+import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Stop
 import com.example.ui.theme.GoldSecondary
 import com.example.ui.theme.WinePrimary
+import com.example.ui.theme.GranateButton
+import com.example.ui.theme.GranateButtonDark
+import com.example.ui.theme.GranateButtonBorderDark
+import com.example.ui.theme.appButtonColors
+import com.example.ui.theme.appButtonBorder
+import com.example.ui.theme.appWineColor
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -98,7 +104,7 @@ fun FavoritesScreen(
   }
 
   var selectedTabIndex by remember { mutableIntStateOf(0) }
-  val tabs = listOf("Versículos", "Oraciones", "Mis Peticiones", "Notificaciones")
+  val tabs = listOf("Oraciones", "Mis Peticiones", "Notificaciones")
 
   // Data states
   var favVersesIds by remember { mutableStateOf(prefs.getFavoriteVerses()) }
@@ -153,7 +159,7 @@ fun FavoritesScreen(
         .widthIn(max = 600.dp)
         .clip(RoundedCornerShape(14.dp)),
       containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
-      contentColor = WinePrimary
+      contentColor = appWineColor()
     ) {
       tabs.forEachIndexed { index, title ->
         Tab(
@@ -175,102 +181,7 @@ fun FavoritesScreen(
 
     when (selectedTabIndex) {
       0 -> {
-        // TAB 1: FAVORITE VERSES
-        val favoriteVerses = remember(favVersesIds) {
-          favVersesIds.mapNotNull { VerseRepository.getVerseById(it) }
-        }
-
-        if (favoriteVerses.isEmpty()) {
-          Box(
-            modifier = Modifier
-              .fillMaxSize()
-              .padding(32.dp),
-            contentAlignment = Alignment.Center
-          ) {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-              Text("📖", fontSize = 48.sp)
-              Spacer(modifier = Modifier.height(12.dp))
-              Text(
-                text = "Aún no tienes versículos guardados",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onSurface
-              )
-              Spacer(modifier = Modifier.height(6.dp))
-              Text(
-                text = "Pulsa el corazón en cualquier versículo para conservarlo en tu altar personal.",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                textAlign = TextAlign.Center
-              )
-            }
-          }
-        } else {
-          LazyColumn(
-            modifier = Modifier
-              .fillMaxSize()
-              .widthIn(max = 600.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-          ) {
-            items(favoriteVerses, key = { it.id }) { verse ->
-              Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(18.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-              ) {
-                Column(modifier = Modifier.padding(16.dp)) {
-                  Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                  ) {
-                    Text(
-                      text = verse.citation,
-                      style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = WinePrimary
-                      )
-                    )
-                    IconButton(
-                      onClick = {
-                        prefs.toggleFavoriteVerse(verse.id)
-                        favVersesIds = prefs.getFavoriteVerses()
-                        scope.launch {
-                          snackbarHostState.showSnackbar("Versículo quitado de favoritos")
-                        }
-                      }
-                    ) {
-                      Icon(
-                        imageVector = Icons.Default.Delete,
-                        contentDescription = "Eliminar de favoritos",
-                        tint = MaterialTheme.colorScheme.outline
-                      )
-                    }
-                  }
-                  Text(
-                    text = "«${verse.godSaysToday}»",
-                    style = MaterialTheme.typography.bodyMedium.copy(
-                      fontFamily = FontFamily.Serif,
-                      fontWeight = FontWeight.SemiBold
-                    ),
-                    color = MaterialTheme.colorScheme.onPrimaryContainer
-                  )
-                  Spacer(modifier = Modifier.height(6.dp))
-                  Text(
-                    text = verse.text,
-                    style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                    color = MaterialTheme.colorScheme.onSurface
-                  )
-                }
-              }
-            }
-            item { Spacer(modifier = Modifier.height(24.dp)) }
-          }
-        }
-      }
-
-      1 -> {
-        // TAB 2: FAVORITE PRAYERS
+        // TAB 1: FAVORITE PRAYERS
         val favoritePrayers = remember(favPrayersIds) {
           favPrayersIds.mapNotNull { PrayerRepository.getPrayerById(it) }
         }
@@ -307,7 +218,7 @@ fun FavoritesScreen(
               .widthIn(max = 600.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
           ) {
-            items(favoritePrayers, key = { it.id }) { prayer ->
+            itemsIndexed(favoritePrayers, key = { index, prayer -> "fp_${index}_${prayer.id}" }) { _, prayer ->
               val isPlaying = playingPrayerId == prayer.id
               Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -358,7 +269,7 @@ fun FavoritesScreen(
                       Icon(
                         imageVector = if (isPlaying) Icons.Default.Stop else Icons.Default.PlayArrow,
                         contentDescription = if (isPlaying) "Detener audio" else "Escuchar oración",
-                        tint = if (isPlaying) WinePrimary else MaterialTheme.colorScheme.primary
+                        tint = if (isPlaying) appWineColor() else MaterialTheme.colorScheme.primary
                       )
                     }
 
@@ -397,8 +308,8 @@ fun FavoritesScreen(
         }
       }
 
-      2 -> {
-        // TAB 3: PRAYER PETITIONS / INTENTIONS
+      1 -> {
+        // TAB 2: PRAYER PETITIONS / INTENTIONS
         Column(
           modifier = Modifier
             .fillMaxSize()
@@ -409,10 +320,8 @@ fun FavoritesScreen(
             modifier = Modifier
               .fillMaxWidth()
               .testTag("add_petition_button"),
-            colors = ButtonDefaults.buttonColors(
-              containerColor = WinePrimary,
-              contentColor = Color.White
-            ),
+            colors = appButtonColors(),
+            border = appButtonBorder(),
             shape = RoundedCornerShape(14.dp)
           ) {
             Icon(imageVector = Icons.Default.Add, contentDescription = null, tint = Color.White)
@@ -451,7 +360,7 @@ fun FavoritesScreen(
             LazyColumn(
               verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-              items(petitions, key = { it }) { item ->
+              itemsIndexed(petitions, key = { index, item -> "pet_${index}_${item}" }) { _, item ->
                 Card(
                   modifier = Modifier.fillMaxWidth(),
                   shape = RoundedCornerShape(16.dp),
@@ -494,8 +403,8 @@ fun FavoritesScreen(
         }
       }
 
-      3 -> {
-        // TAB 4: NOTIFICATION SETTINGS
+      2 -> {
+        // TAB 3: NOTIFICATION SETTINGS
         val formattedTime = String.format(Locale.getDefault(), "%02d:%02d", notifHour, notifMinute)
 
         LazyColumn(
@@ -564,7 +473,7 @@ fun FavoritesScreen(
                     },
                     colors = SwitchDefaults.colors(
                       checkedThumbColor = Color.White,
-                      checkedTrackColor = WinePrimary
+                      checkedTrackColor = appWineColor()
                     )
                   )
                 }
@@ -611,7 +520,7 @@ fun FavoritesScreen(
                       text = formattedTime,
                       style = MaterialTheme.typography.titleLarge.copy(
                         fontWeight = FontWeight.Bold,
-                        color = WinePrimary
+                        color = appWineColor()
                       )
                     )
                   }
@@ -627,10 +536,8 @@ fun FavoritesScreen(
                     }
                   },
                   modifier = Modifier.fillMaxWidth(),
-                  colors = ButtonDefaults.buttonColors(
-                    containerColor = WinePrimary,
-                    contentColor = Color.White
-                  ),
+                  colors = appButtonColors(),
+                  border = appButtonBorder(),
                   shape = RoundedCornerShape(12.dp)
                 ) {
                   Icon(imageVector = Icons.Default.Notifications, contentDescription = null, tint = Color.White)
@@ -678,10 +585,9 @@ fun FavoritesScreen(
               }
             }
           },
-          colors = ButtonDefaults.buttonColors(
-            containerColor = WinePrimary,
-            contentColor = Color.White
-          )
+          colors = appButtonColors(),
+          border = appButtonBorder(),
+          shape = RoundedCornerShape(10.dp)
         ) {
           Text("Guardar", color = Color.White, fontWeight = FontWeight.Bold)
         }
@@ -693,7 +599,7 @@ fun FavoritesScreen(
             newPetitionText = ""
           }
         ) {
-          Text("Cancelar")
+          Text("Cancelar", color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
       }
     )

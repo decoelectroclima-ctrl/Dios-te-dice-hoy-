@@ -18,7 +18,7 @@ import org.robolectric.RobolectricTestRunner
 import org.robolectric.annotation.Config
 
 @RunWith(RobolectricTestRunner::class)
-@Config(sdk = [34])
+@Config(sdk = [33])
 class ExampleRobolectricTest {
 
   @Test
@@ -36,12 +36,12 @@ class ExampleRobolectricTest {
   }
 
   @Test
-  fun `verify bible verses repository`() {
+  fun `verify dios te dice hoy messages repository`() {
     val verses = VerseRepository.verses
-    assertTrue("Should contain curated verses", verses.size >= 12)
+    assertTrue("Should contain curated messages", verses.size >= 12)
 
     val daily = VerseRepository.getDailyVerse()
-    assertNotNull("Daily verse must not be null", daily)
+    assertNotNull("Daily message must not be null", daily)
     assertTrue(daily.citation.isNotBlank())
     assertTrue(daily.godSaysToday.isNotBlank())
     assertTrue(daily.modernMeaning.isNotBlank())
@@ -50,8 +50,8 @@ class ExampleRobolectricTest {
     val randomVerse = VerseRepository.getRandomVerse()
     assertNotNull(randomVerse)
 
-    val virtueVerse = VerseRepository.getVerseByVirtue("Paz")
-    assertNotNull(virtueVerse)
+    val peaceVerse = VerseRepository.getVerseByVirtue("Paz")
+    assertNotNull(peaceVerse)
   }
 
   @Test
@@ -66,8 +66,8 @@ class ExampleRobolectricTest {
     // Verify Oracion al Espiritu Santo del Cardenal Verdier
     val verdier = PrayerRepository.getPrayerById("oracion_cardenal_verdier")
     assertNotNull("Cardenal Verdier prayer must exist", verdier)
-    assertTrue(verdier!!.content.contains("Amor del Padre y del Hijo"))
-    assertTrue(verdier.content.contains("Inspírame siempre lo que debo pensar"))
+    assertTrue(verdier!!.content.contains("Amor del Padre y del Hijo,"))
+    assertTrue(verdier.content.contains("inspírame siempre lo que debo pensar"))
 
     // Verify Adoro Te Devote and Te Deum
     val adoroTe = PrayerRepository.getPrayerById("adoro_te_devote")
@@ -191,11 +191,137 @@ class ExampleRobolectricTest {
   }
 
   @Test
-  fun `verify daily verse widget provider updates`() {
+  fun `verify widget provider update and sync functionality`() {
     val context = ApplicationProvider.getApplicationContext<Context>()
-    // Calling updateAllWidgets should execute safely without crashing
-    com.example.widget.DailyVerseWidgetProvider.updateAllWidgets(context)
-    val daily = VerseRepository.getDailyVerse()
-    assertNotNull(daily)
+    val verse = com.example.widget.DiosTeDiceWidgetProvider.updateAllWidgets(context, newRandomVerse = true)
+    assertNotNull("Updated verse from widget provider should not be null", verse)
+    assertTrue("Widget verse citation should not be blank", verse.citation.isNotBlank())
+    assertTrue("Widget verse text should not be blank", verse.verseText.isNotBlank())
+  }
+
+  @Test
+  fun `verify free will random scripture and preference storage`() {
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val prefs = UserPreferences(context)
+    val randomVerse = VerseRepository.getRandomVerse()
+    assertNotNull(randomVerse)
+    prefs.setLastFreeWillVerseId(randomVerse.id)
+    assertEquals(randomVerse.id, prefs.getLastFreeWillVerseId())
+  }
+
+  @Test
+  fun `verify all 49 catholic novenas with 9 days each and reminders`() {
+    val novenas = com.example.data.NovenaRepository.novenas
+    assertEquals("Should contain exactly 49 authentic Catholic Novenas", 49, novenas.size)
+
+    novenas.forEach { novena ->
+      assertTrue("Novena ${novena.id} title must not be blank", novena.title.isNotBlank())
+      assertTrue("Novena ${novena.id} must have exactly 9 days", novena.days.size == 9)
+      assertTrue("Novena ${novena.id} initial prayer must not be blank", novena.openingPrayer.isNotBlank())
+      assertTrue("Novena ${novena.id} final prayer must not be blank", novena.closingPrayer.isNotBlank())
+      novena.days.forEach { day ->
+        assertEquals(novena.days.indexOf(day) + 1, day.dayNumber)
+        assertTrue("Day ${day.dayNumber} theme in ${novena.id} must not be blank", day.title.isNotBlank())
+        assertTrue("Day ${day.dayNumber} meditation in ${novena.id} must not be blank", day.meditation.isNotBlank())
+        assertTrue("Day ${day.dayNumber} prayer in ${novena.id} must not be blank", day.dailyPrayer.isNotBlank())
+      }
+    }
+
+    val context = ApplicationProvider.getApplicationContext<Context>()
+    val prefs = UserPreferences(context)
+    val testNovena = novenas.first()
+    assertEquals(1, prefs.getNovenaCurrentDay(testNovena.id))
+    prefs.setNovenaCurrentDay(testNovena.id, 5)
+    assertEquals(5, prefs.getNovenaCurrentDay(testNovena.id))
+
+    prefs.setNovenaReminderEnabled(testNovena.id, true)
+    assertTrue(prefs.isNovenaReminderEnabled(testNovena.id))
+    prefs.setNovenaReminderTime(testNovena.id, 18, 30)
+    val (hour, minute) = prefs.getNovenaReminderTime(testNovena.id)
+    assertEquals(18, hour)
+    assertEquals(30, minute)
+  }
+
+  @Test
+  fun `verify chaplet of divine mercy with prayers and promises`() {
+    val threePmPrayer = com.example.data.CoronillaRepository.THREE_PM_PRAYER
+    assertTrue(threePmPrayer.contains("Expiraste, Jesús"))
+
+    val promises = com.example.data.CoronillaRepository.promises
+    assertTrue("Must have promises of Divine Mercy", promises.isNotEmpty())
+
+    val padreEterno = com.example.data.CoronillaRepository.ETERNAL_FATHER_PRAYER
+    assertTrue(padreEterno.contains("Padre Eterno, te ofrezco"))
+
+    val dolorosaPasion = com.example.data.CoronillaRepository.SORROWFUL_PASSION_PRAYER
+    assertTrue(dolorosaPasion.contains("Por su dolorosa Pasión"))
+
+    val doxology = com.example.data.CoronillaRepository.HOLY_GOD_DOXOLOGY
+    assertTrue(doxology.contains("Santo Dios"))
+
+    val concluding = com.example.data.CoronillaRepository.CONCLUDING_PRAYER
+    assertTrue(concluding.contains("Oh Dios Eterno"))
+  }
+
+  @Test
+  fun `verify liturgy of the hours with laudes visperas completas and oficio`() {
+    val hours = com.example.data.LiturgyOfHoursRepository.hours
+    assertEquals(4, hours.size)
+
+    val laudes = hours.find { it.id == "laudes" }
+    assertNotNull(laudes)
+    assertTrue(laudes!!.gospelCanticleTitle.contains("Benedictus"))
+
+    val visperas = hours.find { it.id == "visperas" }
+    assertNotNull(visperas)
+    assertTrue(visperas!!.gospelCanticleTitle.contains("Magníficat"))
+
+    val completas = hours.find { it.id == "completas" }
+    assertNotNull(completas)
+    assertTrue(completas!!.gospelCanticleTitle.contains("Nunc Dimittis"))
+
+    val oficio = hours.find { it.id == "oficio_lectura" }
+    assertNotNull(oficio)
+    assertTrue(oficio!!.gospelCanticleTitle.contains("Te Deum"))
+  }
+
+  @Test
+  fun `verify holy rosary mysteries of today and bead prayers`() {
+    val todayMystery = com.example.data.RosaryRepository.getMysteryForToday()
+    assertNotNull(todayMystery)
+    assertEquals(5, todayMystery.mysteries.size)
+
+    assertTrue(com.example.data.RosaryRepository.HAIL_MARY_TEXT.contains("Dios te salve, María"))
+    assertTrue(com.example.data.RosaryRepository.OUR_FATHER_TEXT.contains("Padre nuestro"))
+    assertTrue(com.example.data.RosaryRepository.GLORY_BE_TEXT.contains("Gloria al Padre"))
+    assertTrue(com.example.data.RosaryRepository.FATIMA_EJACULATION.contains("perdona nuestros pecados"))
+    assertTrue(com.example.data.RosaryRepository.SALVE_REGINA_TEXT.contains("Dios te salve, Reina y Madre"))
+  }
+
+  @Test
+  fun `verify saint of the day with history and bio`() {
+    val todayDay = com.example.data.CatholicCalendarRepository.getTodayDay()
+    assertNotNull(todayDay)
+    assertTrue(todayDay.saintName.isNotBlank())
+    assertTrue(todayDay.saintBiography.isNotBlank())
+    assertTrue(todayDay.saintPatronage.isNotBlank())
+    assertTrue(todayDay.dailyPrayer.isNotBlank())
+  }
+
+  @Test
+  fun `verify 53 essential catholic prayers`() {
+    val allPrayers = PrayerRepository.getAllPrayers()
+    assertTrue("Must have at least 53 essential Catholic prayers, found ${allPrayers.size}", allPrayers.size >= 53)
+  }
+
+  @Test
+  fun `verify via crucis 14 stations`() {
+    val stations = com.example.data.ViaCrucisRepository.stations
+    assertEquals(14, stations.size)
+    stations.forEach { station ->
+      assertTrue(station.title.isNotBlank())
+      assertTrue(station.meditation.isNotBlank())
+      assertTrue(station.prayer.isNotBlank())
+    }
   }
 }

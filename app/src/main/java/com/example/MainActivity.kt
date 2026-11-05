@@ -1,5 +1,6 @@
 package com.example
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -50,9 +51,9 @@ import com.example.data.UserPreferences
 import com.example.model.PrayerPurpose
 import com.example.notification.NotificationHelper
 import com.example.ui.components.SacredTopBar
-import com.example.ui.screens.BibleReaderScreen
+
 import com.example.ui.screens.ConfessionScreen
-import com.example.ui.screens.FreeWillScreen
+
 import com.example.ui.screens.HandOfGodScreen
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.LiturgyScreen
@@ -62,35 +63,52 @@ import com.example.ui.screens.SacredMusicScreen
 import com.example.ui.screens.SettingsScreen
 import com.example.ui.screens.SpiritualLifeScreen
 import com.example.ui.screens.HolySpiritScreen
+import com.example.ui.screens.StudyGuideScreen
 import com.example.ui.screens.SplashScreen
+import com.example.ui.screens.ViaCrucisScreen
+import com.example.ui.screens.RosaryInteractiveScreen
+import com.example.ui.screens.AngelusScreen
+import com.example.ui.screens.CoronillaScreen
+import com.example.ui.screens.EucharisticAdorationScreen
+import com.example.ui.screens.FreeWillScreen
+import com.example.ui.screens.NovenasScreen
 import com.example.ui.theme.MyApplicationTheme
 import com.example.ui.theme.WinePrimary
 
 import androidx.fragment.app.FragmentActivity
 import com.example.ui.screens.AuthLockScreen
 import com.example.ui.screens.AuthMode
-import com.example.widget.DailyVerseWidgetProvider
+
 import kotlinx.coroutines.launch
 
 enum class SubScreen {
-  FREE_WILL,
   HAND_OF_GOD,
   HOLY_SPIRIT,
   SETTINGS,
   AUTH_SETUP,
-  SPOTIFY_MUSIC
+  SPOTIFY_MUSIC,
+  STUDY_GUIDE,
+  VIA_CRUCIS,
+  ROSARY_INTERACTIVE,
+  ANGELUS,
+  EUCHARISTIC_ADORATION,
+  FREE_WILL,
+  NOVENAS,
+  CORONILLA
 }
 
 class MainActivity : FragmentActivity() {
 
   override fun onCreate(savedInstanceState: Bundle?) {
     super.onCreate(savedInstanceState)
+    showLastCrashIfAny()
     enableEdgeToEdge()
 
     try {
       // Initialize notification channels and schedule morning & night alarms
       NotificationHelper.createNotificationChannels(this)
       val prefs = UserPreferences(this)
+
       if (prefs.isNotificationEnabled()) {
         NotificationHelper.scheduleDailyAlarm(this)
       }
@@ -98,8 +116,6 @@ class MainActivity : FragmentActivity() {
         NotificationHelper.scheduleNightAlarm(this)
       }
 
-      // Refresh home screen daily widget on launch
-      DailyVerseWidgetProvider.updateAllWidgets(this)
     } catch (e: Throwable) {
       android.util.Log.e("MainActivity", "Error initializing background services on launch", e)
     }
@@ -107,7 +123,7 @@ class MainActivity : FragmentActivity() {
     val openTabExtra = intent?.getStringExtra("OPEN_TAB")
 
     setContent {
-      android.util.Log.e("MainActivity", "Starting setContent")
+      android.util.Log.i("MainActivity", "Starting setContent")
       val context = LocalContext.current
       val userPrefs = remember { UserPreferences(context) }
       var currentThemeMode by remember { mutableStateOf(userPrefs.getThemeMode()) }
@@ -132,7 +148,11 @@ class MainActivity : FragmentActivity() {
           )
         } else {
           MainAppContent(
-            initialSubScreen = if (openTabExtra == "HAND_OF_GOD") SubScreen.HAND_OF_GOD else null,
+            initialSubScreen = when (openTabExtra) {
+              "HAND_OF_GOD" -> SubScreen.HAND_OF_GOD
+              "ANGELUS" -> SubScreen.ANGELUS
+              else -> null
+            },
             currentThemeMode = currentThemeMode,
             onThemeModeChanged = { newMode ->
               currentThemeMode = newMode
@@ -146,9 +166,42 @@ class MainActivity : FragmentActivity() {
     }
   }
 
+  private fun showLastCrashIfAny() {
+    try {
+      val f = java.io.File(filesDir, "last_crash.txt")
+      if (!f.exists()) return
+      val text = f.readText()
+      android.app.AlertDialog.Builder(this)
+        .setTitle("Error de la sesión anterior")
+        .setMessage(text.take(3000))
+        .setPositiveButton("Compartir") { _, _ ->
+          f.delete()
+          startActivity(Intent.createChooser(
+            Intent(Intent.ACTION_SEND).apply {
+              type = "text/plain"
+              putExtra(Intent.EXTRA_TEXT, text)
+            }, "Enviar error"))
+        }
+        .setNegativeButton("Cerrar") { _, _ -> f.delete() }
+        .setCancelable(false)
+        .show()
+    } catch (_: Throwable) {}
+  }
+
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     setIntent(intent)
+  }
+
+  override fun onRequestPermissionsResult(
+    requestCode: Int,
+    permissions: Array<out String>,
+    grantResults: IntArray
+  ) {
+    super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+    if (requestCode == com.example.util.PermissionBridge.REQUEST_CODE) {
+      com.example.util.PermissionBridge.onResult(permissions, grantResults)
+    }
   }
 }
 
@@ -160,7 +213,7 @@ fun MainAppContent(
   onThemeModeChanged: (String) -> Unit,
   onFontSizeChanged: (Float) -> Unit
 ) {
-  android.util.Log.e("MainAppContent", "Starting MainAppContent")
+  android.util.Log.i("MainAppContent", "Starting MainAppContent")
   val context = LocalContext.current
   val userPrefs = remember { UserPreferences(context) }
   val snackbarHostState = remember { SnackbarHostState() }
@@ -170,25 +223,15 @@ fun MainAppContent(
   var prayersInitialPurpose by remember { mutableStateOf<PrayerPurpose?>(null) }
 
   // Request notification permission on Android 13+ upon launching
-  if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
-    val permissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-      contract = androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-    ) { granted ->
-      if (granted) {
-        scope.launch {
-          snackbarHostState.showSnackbar("¡Permiso de notificaciones concedido!")
-        }
-      }
-    }
-
-    androidx.compose.runtime.LaunchedEffect(Unit) {
-      if (androidx.core.content.ContextCompat.checkSelfPermission(
-          context,
-          android.Manifest.permission.POST_NOTIFICATIONS
+  androidx.compose.runtime.LaunchedEffect(Unit) {
+    val activity = context as? Activity
+    if (activity != null && android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU &&
+        androidx.core.content.ContextCompat.checkSelfPermission(
+            activity,
+            android.Manifest.permission.POST_NOTIFICATIONS
         ) != android.content.pm.PackageManager.PERMISSION_GRANTED
-      ) {
-        permissionLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-      }
+    ) {
+      com.example.util.PermissionBridge.request(activity, arrayOf(android.Manifest.permission.POST_NOTIFICATIONS)) { }
     }
   }
 
@@ -223,11 +266,6 @@ fun MainAppContent(
         subtitle = "Examen de Conciencia y Cardenal Verdier"
       ),
       NavigationDestination(
-        title = "Biblia",
-        icon = Icons.Default.Book,
-        subtitle = "Lectura completa"
-      ),
-      NavigationDestination(
         title = "Espiritual",
         icon = Icons.Default.LocalFireDepartment,
         subtitle = "Vida Espiritual"
@@ -248,11 +286,18 @@ fun MainAppContent(
                 Text(
                   text = when (subScreen) {
                     SubScreen.SETTINGS -> "Configuración"
-                    SubScreen.FREE_WILL -> "Libre Albedrío"
                     SubScreen.HAND_OF_GOD -> "La Mano de Dios"
                     SubScreen.HOLY_SPIRIT -> "Apartado del Espíritu Santo"
                     SubScreen.AUTH_SETUP -> "Seguridad y PIN"
                     SubScreen.SPOTIFY_MUSIC -> "Música Sacra en Spotify"
+                    SubScreen.STUDY_GUIDE -> "Guía de Estudio"
+                    SubScreen.VIA_CRUCIS -> "El Santo Viacrucis"
+                    SubScreen.ROSARY_INTERACTIVE -> "El Santo Rosario Interactivo"
+                    SubScreen.ANGELUS -> "El Ángelus y Regina Caeli"
+                    SubScreen.EUCHARISTIC_ADORATION -> "Adoración y Comunión Espiritual"
+                    SubScreen.FREE_WILL -> "El Don del Libre Albedrío"
+                    SubScreen.NOVENAS -> "49 Novenas Católicas"
+                    SubScreen.CORONILLA -> "Coronilla de la Misericordia"
                     null -> ""
                   },
                   style = MaterialTheme.typography.titleLarge.copy(
@@ -348,9 +393,7 @@ fun MainAppContent(
                         onFontSizeChanged = onFontSizeChanged,
                         onOpenPinSetup = { subScreen = SubScreen.AUTH_SETUP }
                     )
-                    SubScreen.FREE_WILL -> FreeWillScreen(
-                        snackbarHostState = snackbarHostState
-                    )
+
                     SubScreen.HAND_OF_GOD -> HandOfGodScreen(
                         snackbarHostState = snackbarHostState
                     )
@@ -372,14 +415,22 @@ fun MainAppContent(
                     SubScreen.SPOTIFY_MUSIC -> SacredMusicScreen(
                         snackbarHostState = snackbarHostState
                     )
+                    SubScreen.STUDY_GUIDE -> StudyGuideScreen(onBack = { subScreen = null })
+                    SubScreen.VIA_CRUCIS -> ViaCrucisScreen(snackbarHostState = snackbarHostState)
+                    SubScreen.ROSARY_INTERACTIVE -> RosaryInteractiveScreen(snackbarHostState = snackbarHostState)
+                    SubScreen.ANGELUS -> AngelusScreen(snackbarHostState = snackbarHostState)
+                    SubScreen.EUCHARISTIC_ADORATION -> EucharisticAdorationScreen(snackbarHostState = snackbarHostState)
+                    SubScreen.FREE_WILL -> FreeWillScreen(snackbarHostState = snackbarHostState)
+                    SubScreen.NOVENAS -> NovenasScreen(snackbarHostState = snackbarHostState)
+                    SubScreen.CORONILLA -> CoronillaScreen(snackbarHostState = snackbarHostState)
+                    else -> {}
                 }
             } else {
                 when (activeTab) {
                     0 -> HomeScreen(
                         snackbarHostState = snackbarHostState,
                         currentThemeMode = currentThemeMode,
-                        onThemeModeChanged = onThemeModeChanged,
-                        onNavigateToLiturgy = { currentTabIndex = 1 }
+                        onThemeModeChanged = onThemeModeChanged
                     )
                     1 -> LiturgyScreen(
                         snackbarHostState = snackbarHostState
@@ -391,17 +442,23 @@ fun MainAppContent(
                     3 -> ConfessionScreen(
                         snackbarHostState = snackbarHostState
                     )
-                    4 -> BibleReaderScreen()
-                    5 -> SpiritualLifeScreen(
-                        onNavigateToFreeWill = { subScreen = SubScreen.FREE_WILL },
+                    4 -> SpiritualLifeScreen(
+                        onNavigateToViaCrucis = { subScreen = SubScreen.VIA_CRUCIS },
+                        onNavigateToRosary = { subScreen = SubScreen.ROSARY_INTERACTIVE },
+                        onNavigateToCoronilla = { subScreen = SubScreen.CORONILLA },
+                        onNavigateToNovenas = { subScreen = SubScreen.NOVENAS },
+                        onNavigateToAngelus = { subScreen = SubScreen.ANGELUS },
+                        onNavigateToEucharisticAdoration = { subScreen = SubScreen.EUCHARISTIC_ADORATION },
                         onNavigateToHolySpirit = { subScreen = SubScreen.HOLY_SPIRIT },
                         onNavigateToConfession = { currentTabIndex = 3 },
                         onNavigateToHandOfGod = { subScreen = SubScreen.HAND_OF_GOD },
-                        onNavigateToSpotify = { subScreen = SubScreen.SPOTIFY_MUSIC }
+                        onNavigateToSpotify = { subScreen = SubScreen.SPOTIFY_MUSIC },
+                        onNavigateToFreeWill = { subScreen = SubScreen.FREE_WILL }
                     )
-                    6 -> ParishScreen(
+                    5 -> ParishScreen(
                         snackbarHostState = snackbarHostState
                     )
+
                 }
             }
         }

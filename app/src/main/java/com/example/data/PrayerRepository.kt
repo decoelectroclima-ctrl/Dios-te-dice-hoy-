@@ -14,16 +14,21 @@ object PrayerRepository {
       latinTitle = "Oratio ad Spiritum Sanctum (Cardinalis Verdier)",
       category = PrayerCategory.ESPIRITU_SANTO,
       purpose = PrayerPurpose.ESPIRITU_SANTO,
-      content = """¡Oh Espíritu Santo, Amor del Padre y del Hijo!
-Inspírame siempre lo que debo pensar,
+      content = """Oh Espíritu Santo, Amor del Padre y del Hijo,
+inspírame siempre lo que debo pensar,
 lo que debo decir, cómo debo decirlo,
-lo que debo callar, lo que debo escribir,
-cómo debo actuar, lo que debo hacer,
-para procurar vuestra gloria,
-el bien de las almas y mi propia santificación.
-
-¡Oh Jesús, toda mi confianza está en Ti!
-¡Oh María, Templo del Espíritu Santo, ruega por nosotros!
+lo que debo callar, cómo debo actuar,
+lo que debo hacer,
+para gloria de Dios, bien de las almas
+y mi propia santificación.
+Espíritu Santo, dame agudeza para entender,
+capacidad para retener,
+método y facultad para aprender,
+sutileza para interpretar,
+gracia y eficacia para hablar.
+Dame acierto al empezar,
+dirección al progresar
+y perfección al acabar.
 Amén.""",
       description = "Célebre oración del Cardenal Jean Verdier (Arzobispo de París). Plegaria imprescindible de discernimiento para iluminar los pensamientos, palabras y obras bajo el fuego del Espíritu Santo."
     ),

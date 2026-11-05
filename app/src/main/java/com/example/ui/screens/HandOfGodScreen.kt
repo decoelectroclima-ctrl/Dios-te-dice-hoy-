@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -66,6 +67,12 @@ import com.example.model.HandOfGodEntry
 import com.example.notification.NotificationHelper
 import com.example.ui.theme.GoldSecondary
 import com.example.ui.theme.WinePrimary
+import com.example.ui.theme.GranateButton
+import com.example.ui.theme.GranateButtonDark
+import com.example.ui.theme.GranateButtonBorderDark
+import com.example.ui.theme.appButtonColors
+import com.example.ui.theme.appButtonBorder
+import com.example.ui.theme.appWineColor
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -164,7 +171,7 @@ fun HandOfGodScreen(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
               ),
-              color = WinePrimary
+              color = appWineColor()
             )
             Spacer(modifier = Modifier.height(2.dp))
             Text(
@@ -185,10 +192,8 @@ fun HandOfGodScreen(
           .fillMaxWidth()
           .widthIn(max = 600.dp)
           .testTag("add_hand_of_god_button"),
-        colors = ButtonDefaults.buttonColors(
-          containerColor = WinePrimary,
-          contentColor = Color.White
-        ),
+        colors = appButtonColors(),
+        border = appButtonBorder(),
         shape = RoundedCornerShape(14.dp)
       ) {
         Icon(imageVector = Icons.Default.Add, contentDescription = null, modifier = Modifier.size(18.dp), tint = Color.White)
@@ -258,7 +263,7 @@ fun HandOfGodScreen(
               },
               colors = SwitchDefaults.colors(
                 checkedThumbColor = Color.White,
-                checkedTrackColor = WinePrimary
+                checkedTrackColor = appWineColor()
               )
             )
           }
@@ -293,10 +298,8 @@ fun HandOfGodScreen(
                   snackbarHostState.showSnackbar("🔔 ¡Notificación nocturna de prueba enviada!")
                 }
               },
-              colors = ButtonDefaults.buttonColors(
-                containerColor = WinePrimary,
-                contentColor = Color.White
-              ),
+              colors = appButtonColors(),
+              border = appButtonBorder(),
               shape = RoundedCornerShape(10.dp)
             ) {
               Text("Probar", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
@@ -356,7 +359,7 @@ fun HandOfGodScreen(
         }
       }
     } else {
-      items(entries, key = { it.id }) { item ->
+      itemsIndexed(entries, key = { index, item -> "hog_${index}_${item.id}" }) { _, item ->
         Card(
           modifier = Modifier
             .fillMaxWidth()
