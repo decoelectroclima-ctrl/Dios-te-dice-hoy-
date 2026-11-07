@@ -279,7 +279,104 @@ fun SettingsScreen(
       }
     }
 
+    // NOTIFICACIÓN DIARIA PROGRAMABLE: "DIOS TE DICE HOY"
+    item {
+      Card(
+        modifier = Modifier
+          .fillMaxWidth()
+          .widthIn(max = 600.dp),
+        shape = RoundedCornerShape(20.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+      ) {
+        Column(modifier = Modifier.padding(18.dp)) {
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+              Text("🕊️", fontSize = 20.sp)
+              Spacer(modifier = Modifier.width(10.dp))
+              Column {
+                Text(
+                  text = "Notificación Diaria «Dios Te Dice Hoy»",
+                  style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                  color = MaterialTheme.colorScheme.onSurface
+                )
+                Text(
+                  text = if (morningNotifEnabled) "Programada a las $formattedMorningTime hrs" else "Desactivada",
+                  style = MaterialTheme.typography.bodySmall,
+                  color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+              }
+            }
 
+            Switch(
+              checked = morningNotifEnabled,
+              onCheckedChange = { checked ->
+                morningNotifEnabled = checked
+                prefs.setNotificationEnabled(checked)
+                if (checked) {
+                  NotificationHelper.scheduleDailyAlarm(context)
+                  scope.launch {
+                    snackbarHostState.showSnackbar("Notificación diaria fijada para las $formattedMorningTime hrs")
+                  }
+                } else {
+                  NotificationHelper.cancelDailyAlarm(context)
+                  scope.launch {
+                    snackbarHostState.showSnackbar("Notificación diaria desactivada")
+                  }
+                }
+              },
+              colors = SwitchDefaults.colors(
+                checkedThumbColor = Color.White,
+                checkedTrackColor = appWineColor()
+              )
+            )
+          }
+
+          Spacer(modifier = Modifier.height(12.dp))
+
+          Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalAlignment = Alignment.CenterVertically
+          ) {
+            Surface(
+              shape = RoundedCornerShape(10.dp),
+              color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f),
+              modifier = Modifier
+                .weight(1f)
+                .clickable { showMorningTimePicker() }
+            ) {
+              Row(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically
+              ) {
+                Icon(imageVector = Icons.Default.AccessTime, contentDescription = null, modifier = Modifier.size(18.dp), tint = appWineColor())
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Hora: $formattedMorningTime hrs", style = MaterialTheme.typography.bodySmall, fontWeight = FontWeight.Bold)
+              }
+            }
+
+            Button(
+              onClick = {
+                NotificationHelper.sendTestNotification(context)
+                scope.launch {
+                  snackbarHostState.showSnackbar("🔔 ¡Notificación diaria de prueba enviada!")
+                }
+              },
+              colors = appButtonColors(),
+              border = appButtonBorder(),
+              shape = RoundedCornerShape(10.dp)
+            ) {
+              Text("Probar", fontSize = 12.sp, color = Color.White, fontWeight = FontWeight.Bold)
+            }
+          }
+        }
+      }
+    }
 
     // ALARMA Y RECORDATORIO NOCTURNO ("LA MANO DE DIOS")
     item {

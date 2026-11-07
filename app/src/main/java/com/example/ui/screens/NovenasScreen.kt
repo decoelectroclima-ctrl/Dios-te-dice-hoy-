@@ -163,7 +163,7 @@ fun NovenasScreen(
             Icon(
               imageVector = Icons.AutoMirrored.Filled.ArrowBack,
               contentDescription = "Volver a la lista de novenas",
-              tint = WinePrimary
+              tint = appWineColor()
             )
           }
           Spacer(modifier = Modifier.width(6.dp))
@@ -174,7 +174,7 @@ fun NovenasScreen(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
               ),
-              color = WinePrimary
+              color = appWineColor()
             )
             Text(
               text = "Fiesta: ${novena.feastDate}",
@@ -198,7 +198,7 @@ fun NovenasScreen(
             Text(
               text = "Progreso de la Novena (Día $currentDay de 9):",
               style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-              color = WinePrimary
+              color = appWineColor()
             )
             Spacer(modifier = Modifier.height(8.dp))
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
@@ -332,7 +332,7 @@ fun NovenasScreen(
                 fontWeight = FontWeight.Bold,
                 fontFamily = FontFamily.Serif
               ),
-              color = WinePrimary
+              color = appWineColor()
             )
 
             Spacer(modifier = Modifier.height(12.dp))
@@ -347,7 +347,7 @@ fun NovenasScreen(
                 Text(
                   text = "🕊️ Oración Inicial para todos los días:",
                   style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                  color = WinePrimary
+                  color = appWineColor()
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
@@ -582,7 +582,7 @@ fun NovenasScreen(
           onValueChange = { searchQuery = it },
           placeholder = { Text("Buscar entre las 49 novenas...") },
           leadingIcon = {
-            Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = WinePrimary)
+            Icon(imageVector = Icons.Default.Search, contentDescription = null, tint = appWineColor())
           },
           trailingIcon = {
             if (searchQuery.isNotEmpty()) {
@@ -594,7 +594,7 @@ fun NovenasScreen(
           singleLine = true,
           shape = RoundedCornerShape(16.dp),
           colors = OutlinedTextFieldDefaults.colors(
-            focusedBorderColor = WinePrimary,
+            focusedBorderColor = appWineColor(),
             unfocusedBorderColor = MaterialTheme.colorScheme.outlineVariant
           ),
           modifier = Modifier
@@ -618,7 +618,7 @@ fun NovenasScreen(
               onClick = { selectedCategory = cat },
               label = { Text(cat, fontSize = 12.sp) },
               colors = FilterChipDefaults.filterChipColors(
-                selectedContainerColor = WinePrimary,
+                selectedContainerColor = appWineColor(),
                 selectedLabelColor = Color.White
               ),
               border = FilterChipDefaults.filterChipBorder(
